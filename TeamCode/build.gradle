@@ -19,6 +19,9 @@ android {
     namespace = 'org.firstinspires.ftc.teamcode'
 
     packagingOptions {
+        jniLibs {
+            pickFirsts += ['**/*.so']
+        }
         jniLibs.useLegacyPackaging true
     }
 }
@@ -49,7 +52,7 @@ dependencies {
 
     implementation "org.solverslib:core:0.3.4" // core
     implementation "org.solverslib:pedroPathing:0.3.4" // pedroPathing
-    //    implementation "org.solverslib:photon:0.3.4" // photon is optional (see docs for more info)
+    implementation "org.solverslib:photon:0.3.4" // photon is optional (see docs for more info)
 
     implementation "com.acmerobotics.dashboard:dashboard:0.5.1" // FTC Dashboard
 
