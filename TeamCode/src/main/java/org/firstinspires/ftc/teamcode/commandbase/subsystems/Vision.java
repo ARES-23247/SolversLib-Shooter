@@ -180,13 +180,31 @@ public class Vision extends SubsystemBase {
         // Step 3: Select fusion mode and compute pose correction
         double[] fusedPose = selectPoseByFusionMode();
 
-        // Step 4: Apply sensor fusion correction
+        // Step 4: Apply sensor fusion correction with adaptive noise
         if (fusedPose != null && robot.drive != null && robot.drive.getSensorFusion() != null) {
-            robot.drive.getSensorFusion().correctWithVision(
-                fusedPose[0],
-                fusedPose[1],
-                fusedPose[2]
-            );
+            // Check if any active camera has floating robot detection
+            boolean hasFloatingReading = checkAnyCameraFloating();
+
+            if (hasFloatingReading) {
+                // Use increased noise for floating readings
+                double positionNoise = calculateEffectivePositionNoise();
+                double headingNoise = calculateEffectiveHeadingNoise();
+
+                robot.drive.getSensorFusion().correctWithVision(
+                    fusedPose[0],
+                    fusedPose[1],
+                    fusedPose[2],
+                    positionNoise,
+                    headingNoise
+                );
+            } else {
+                // Normal vision correction with default noise
+                robot.drive.getSensorFusion().correctWithVision(
+                    fusedPose[0],
+                    fusedPose[1],
+                    fusedPose[2]
+                );
+            }
         }
 
         // Step 5: Telemetry
@@ -441,6 +459,15 @@ public class Vision extends SubsystemBase {
             // Health monitoring
             robot.telemetry.addData("Vision " + camera.getName() + " Time Since Last",
                 String.format("%.1fs", camera.getTimeSinceLastDetection()));
+
+            // Filtering telemetry
+            if (camera.isPoseFloating()) {
+                robot.telemetry.addData("Vision " + camera.getName() + " Floating", "YES");
+            }
+            if (camera.getBoundaryRejectionCount() > 0) {
+                robot.telemetry.addData("Vision " + camera.getName() + " Boundary Rejects",
+                    "%d", camera.getBoundaryRejectionCount());
+            }
         }
 
         // Active camera(s) info
@@ -499,5 +526,60 @@ public class Vision extends SubsystemBase {
             }
         }
         return count;
+    }
+
+    /**
+     * Checks if any active camera detected a "floating" robot reading.
+     *
+     * <p>Floating robot occurs when Z-axis indicates unrealistic height,
+     * often due to seeing elevated AprilTags or bad perspective.</p>
+     *
+     * @return true if any active camera has floating pose, false otherwise
+     */
+    private boolean checkAnyCameraFloating() {
+        for (LimelightCamera camera : activeCameras) {
+            if (camera.isPoseFloating()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Calculates the effective position noise from active cameras.
+     *
+     * <p>If any camera has floating detection, returns increased noise.
+     * Otherwise returns the default vision noise.</p>
+     *
+     * @return effective position noise (inches)
+     */
+    private double calculateEffectivePositionNoise() {
+        // Check if any active camera has floating reading
+        for (LimelightCamera camera : activeCameras) {
+            if (camera.isPoseFloating()) {
+                return camera.getEffectivePositionNoise();
+            }
+        }
+        // No floating readings, use default
+        return org.firstinspires.ftc.teamcode.globals.Constants.FUSION_VISION_NOISE_POSITION;
+    }
+
+    /**
+     * Calculates the effective heading noise from active cameras.
+     *
+     * <p>If any camera has floating detection, returns increased noise.
+     * Otherwise returns the default vision noise.</p>
+     *
+     * @return effective heading noise (radians)
+     */
+    private double calculateEffectiveHeadingNoise() {
+        // Check if any active camera has floating reading
+        for (LimelightCamera camera : activeCameras) {
+            if (camera.isPoseFloating()) {
+                return camera.getEffectiveHeadingNoise();
+            }
+        }
+        // No floating readings, use default
+        return org.firstinspires.ftc.teamcode.globals.Constants.FUSION_VISION_NOISE_HEADING;
     }
 }

@@ -1068,6 +1068,89 @@ public class Constants {
      */
     public static final double FUSION_VISION_NOISE_HEADING = 0.03;
 
+    // ===== Vision Field Boundary Validation =====
+
+    /**
+     * Whether to enable field boundary checking for vision measurements.
+     * <p>
+     * When enabled, vision readings outside field bounds are rejected to prevent
+     * the EKF from updating with physically impossible positions.
+     * </p>
+     */
+    public static final boolean ENABLE_VISION_BOUNDARY_CHECK = true;
+
+    /**
+     * Field boundary X limits (inches from center).
+     * <p>
+     * FTC field is 12x12 feet = 144x144 inches.
+     * With origin at field center: [-72, +72]
+     * </p>
+     */
+    public static final double FIELD_X_MIN = -72.0;
+    public static final double FIELD_X_MAX = 72.0;
+
+    /**
+     * Field boundary Y limits (inches from center).
+     * <p>
+     * FTC field is 12x12 feet = 144x144 inches.
+     * With origin at field center: [-72, +72]
+     * </p>
+     */
+    public static final double FIELD_Y_MIN = -72.0;
+    public static final double FIELD_Y_MAX = 72.0;
+
+    /**
+     * Safety margin outside field boundary (inches).
+     * <p>
+     * Allows robot to be slightly outside field for edge cases (carpet compression,
+     * robot partially off field during gameplay, etc.).
+     * </p>
+     */
+    public static final double FIELD_BOUNDARY_MARGIN = 6.0;
+
+    // ===== Vision Z-Axis "Floating Robot" Detection =====
+
+    /**
+     * Maximum valid Z/height deviation for vision measurements (inches).
+     * <p>
+     * Readings with Z greater than this indicate the robot is "floating"
+     * (likely due to camera seeing elevated AprilTags or bad perspective).
+     * </p>
+     * <p>
+     * <b>Typical values:</b>
+     * <ul>
+     *   <li>2-4 inches: Robot on flat floor with normal camera mounting</li>
+     *   <li>6-12 inches: Allows for some field irregularities</li>
+     *   <li>12-18 inches: Permissive, handles large field irregularities</li>
+     *   <li>< 0 inches: Robot below field (impossible, reject)</li>
+     * </ul>
+     * </p>
+     * <p>
+     * <b>Note:</b> Camera calibration (mount offsets) should account for normal
+     * mounting height. This threshold catches UNUSUAL Z values that indicate
+     * bad measurements, not normal camera height.
+     * </p>
+     */
+    public static final double VISION_MAX_VALID_Z = 6.0;
+
+    /**
+     * Vision noise multiplier when Z-axis indicates floating robot.
+     * <p>
+     * Increases uncertainty for questionable measurements where the robot appears
+     * to be floating above the field. This allows the EKF to still use potentially
+     * valid x,y data while reducing the weight to prevent pose jumps.
+     * </p>
+     * <p>
+     * <b>Values:</b>
+     * <ul>
+     *   <li>1.0: No change (trust floating readings)</li>
+     *   <li>2.0-3.0: Moderate uncertainty increase (recommended)</li>
+     *   <li>5.0+: High uncertainty (mostly ignore floating readings)</li>
+     * </ul>
+     * </p>
+     */
+    public static final double VISION_FLOATING_NOISE_MULTIPLIER = 3.0;
+
     // ===== Multi-Camera Vision Configuration =====
 
     /**

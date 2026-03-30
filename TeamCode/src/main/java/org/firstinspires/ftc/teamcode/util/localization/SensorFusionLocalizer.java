@@ -278,6 +278,30 @@ public class SensorFusionLocalizer {
     }
 
     /**
+     * Corrects the state estimate with vision measurement using custom noise parameters.
+     *
+     * <p>This overload allows specifying custom measurement noise for cases where
+     * vision quality is degraded (e.g., floating robot detection, poor camera angle).</p>
+     *
+     * @param x measured X position (inches)
+     * @param y measured Y position (inches)
+     * @param heading measured heading (radians)
+     * @param positionNoise position measurement noise std dev (inches)
+     * @param headingNoise heading measurement noise std dev (radians)
+     */
+    public void correctWithVision(double x, double y, double heading,
+                                  double positionNoise, double headingNoise) {
+        // Build custom noise covariance matrix
+        double[][] R_custom = {
+            {positionNoise * positionNoise, 0, 0},
+            {0, positionNoise * positionNoise, 0},
+            {0, 0, headingNoise * headingNoise}
+        };
+
+        correctWithMeasurement(new double[]{x, y, heading}, R_custom);
+    }
+
+    /**
      * Generic correction step using a pose measurement.
      *
      * <h3>Correction Equations:</h3>

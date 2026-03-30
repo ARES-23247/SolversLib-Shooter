@@ -54,6 +54,10 @@ public class LimelightCamera {
     private int detectedTagID = -1;  // Which tag ID was detected
     private double detectionDistance = 0.0;
     private double priority = 0.0;
+    private boolean isPoseFloating = false;  // Z-axis "floating robot" detection
+
+    // Telemetry counters
+    private int boundaryRejectionCount = 0;  // Number of readings rejected by field boundary check
 
     // Timing for health monitoring
     private final ElapsedTime timeSinceLastDetection = new ElapsedTime();
@@ -134,7 +138,11 @@ public class LimelightCamera {
                     // Convert from meters to inches
                     double rawX = botpose.getPosition().x * 39.3701;
                     double rawY = botpose.getPosition().y * 39.3701;
+                    double rawZ = botpose.getPosition().z * 39.3701;  // Extract Z for validation
                     double rawHeading = botpose.getOrientation().getYaw(AngleUnit.RADIANS);
+
+                    // Detect unrealistic Z (floating robot)
+                    isPoseFloating = Math.abs(rawZ) > org.firstinspires.ftc.teamcode.globals.Constants.VISION_MAX_VALID_Z;
 
                     // Apply calibration (mount offset + orientation offset)
                     poseX = rawX + mountX;
@@ -150,6 +158,16 @@ public class LimelightCamera {
 
                     // Only consider valid if within max distance
                     if (detectionDistance <= maxDistance) {
+                        // Check field boundaries if enabled
+                        if (org.firstinspires.ftc.teamcode.globals.Constants.ENABLE_VISION_BOUNDARY_CHECK) {
+                            if (!isWithinFieldBounds(poseX, poseY)) {
+                                // Reject reading outside field boundaries
+                                hasValidDetection = false;
+                                boundaryRejectionCount++;
+                                return;
+                            }
+                        }
+
                         hasValidDetection = true;
                         visibleTagCount = result.getFiducialResults().size();
 
@@ -350,6 +368,77 @@ public class LimelightCamera {
      */
     public Limelight3A getLimelight() {
         return limelight;
+    }
+
+    /**
+     * Checks if the current pose reading indicates a "floating robot" (unrealistic Z).
+     *
+     * <p>This happens when the camera sees elevated AprilTags or has bad perspective,
+     * causing the vision system to think the robot is above the field.</p>
+     *
+     * @return true if Z-axis indicates floating robot, false otherwise
+     */
+    public boolean isPoseFloating() {
+        return isPoseFloating;
+    }
+
+    /**
+     * Gets the number of readings rejected by field boundary checking.
+     *
+     * @return count of boundary rejections
+     */
+    public int getBoundaryRejectionCount() {
+        return boundaryRejectionCount;
+    }
+
+    /**
+     * Gets the effective position noise, accounting for floating robot detection.
+     *
+     * <p>When the robot appears to be floating (unrealistic Z), the noise is increased
+     * to reduce the weight of this measurement in sensor fusion.</p>
+     *
+     * @return effective position noise (inches)
+     */
+    public double getEffectivePositionNoise() {
+        if (isPoseFloating) {
+            return positionNoise * org.firstinspires.ftc.teamcode.globals.Constants.VISION_FLOATING_NOISE_MULTIPLIER;
+        }
+        return positionNoise;
+    }
+
+    /**
+     * Gets the effective heading noise, accounting for floating robot detection.
+     *
+     * <p>When the robot appears to be floating (unrealistic Z), the noise is increased
+     * to reduce the weight of this measurement in sensor fusion.</p>
+     *
+     * @return effective heading noise (radians)
+     */
+    public double getEffectiveHeadingNoise() {
+        if (isPoseFloating) {
+            return headingNoise * org.firstinspires.ftc.teamcode.globals.Constants.VISION_FLOATING_NOISE_MULTIPLIER;
+        }
+        return headingNoise;
+    }
+
+    /**
+     * Checks if a pose is within valid field boundaries.
+     *
+     * <p>Uses field boundary constants with safety margin to allow for edge cases
+     * like robot slightly off field during gameplay.</p>
+     *
+     * @param x X position (inches)
+     * @param y Y position (inches)
+     * @return true if within bounds, false if outside
+     */
+    private boolean isWithinFieldBounds(double x, double y) {
+        double margin = org.firstinspires.ftc.teamcode.globals.Constants.FIELD_BOUNDARY_MARGIN;
+        double xMin = org.firstinspires.ftc.teamcode.globals.Constants.FIELD_X_MIN - margin;
+        double xMax = org.firstinspires.ftc.teamcode.globals.Constants.FIELD_X_MAX + margin;
+        double yMin = org.firstinspires.ftc.teamcode.globals.Constants.FIELD_Y_MIN - margin;
+        double yMax = org.firstinspires.ftc.teamcode.globals.Constants.FIELD_Y_MAX + margin;
+
+        return x >= xMin && x <= xMax && y >= yMin && y <= yMax;
     }
 
     // ===== Pose Getters =====
