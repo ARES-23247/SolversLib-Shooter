@@ -484,18 +484,25 @@ public class Drive extends SubsystemBase {
             double pinpointY = robot.pinpoint.getY();
             double pinpointHeading = Math.toRadians(robot.pinpoint.getHeading());
 
-            // Only use Pinpoint if health monitoring is disabled or if Pinpoint is healthy
-            boolean usePinpoint = !ENABLE_PINPOINT_HEALTH_MONITOR ||
+            // Check if Pinpoint is outside field boundaries (impossible position)
+            boolean pinpointOutOfBounds = ENABLE_PINPOINT_BOUNDARY_CHECK &&
+                                         !isWithinFieldBounds(pinpointX, pinpointY);
+
+            // Only use Pinpoint if:
+            // 1. Not outside field boundaries
+            // 2. Health monitoring is disabled OR Pinpoint is healthy
+            boolean usePinpoint = !pinpointOutOfBounds &&
+                                  (!ENABLE_PINPOINT_HEALTH_MONITOR ||
                                   pinpointHealthMonitor.isHealthy(
                                       pinpointX, pinpointY,
                                       sensorFusion.getEstimatedPose().getX(),
                                       sensorFusion.getEstimatedPose().getY()
-                                  );
+                                  ));
 
             if (usePinpoint) {
                 sensorFusion.correctWithPinpoint(pinpointX, pinpointY, pinpointHeading);
             }
-            // Else: Pinpoint is drifted, skip correction (rely on swerve + vision)
+            // Else: Pinpoint is drifted or out of bounds, skip correction (rely on swerve + vision)
         }
 
         // Get fused pose estimate
@@ -643,6 +650,12 @@ public class Drive extends SubsystemBase {
                     packet.put("Pinpoint Y (in)", String.format("%.2f", robot.pinpoint.getY()));
                     packet.put("Pinpoint Heading (deg)", String.format("%.2f", robot.pinpoint.getHeading()));
 
+                    // Check if Pinpoint is out of bounds
+                    if (ENABLE_PINPOINT_BOUNDARY_CHECK) {
+                        boolean outOfBounds = !isWithinFieldBounds(robot.pinpoint.getX(), robot.pinpoint.getY());
+                        packet.put("Pinpoint Out of Bounds", outOfBounds ? "YES" : "NO");
+                    }
+
                     if (ENABLE_PINPOINT_HEALTH_MONITOR) {
                         String healthStatus = pinpointHealthMonitor.isHealthy() ? "YES" : "NO (DRIFTED)";
                         packet.put("Pinpoint Healthy", healthStatus);
@@ -759,5 +772,25 @@ public class Drive extends SubsystemBase {
 
         // Calculate loop time at the end of periodic
         lastLoopTime = (System.nanoTime() / 1e9) - loopStartTime;
+    }
+
+    /**
+     * Checks if a pose is within valid field boundaries.
+     *
+     * <p>Uses field boundary constants with safety margin to allow for edge cases
+     * like robot slightly off field during gameplay.</p>
+     *
+     * @param x X position (inches)
+     * @param y Y position (inches)
+     * @return true if within bounds, false if outside
+     */
+    private boolean isWithinFieldBounds(double x, double y) {
+        double margin = FIELD_BOUNDARY_MARGIN;
+        double xMin = FIELD_X_MIN - margin;
+        double xMax = FIELD_X_MAX + margin;
+        double yMin = FIELD_Y_MIN - margin;
+        double yMax = FIELD_Y_MAX + margin;
+
+        return x >= xMin && x <= xMax && y >= yMin && y <= yMax;
     }
 }

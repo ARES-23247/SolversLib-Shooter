@@ -1345,6 +1345,18 @@ public class Constants {
     public static final boolean ENABLE_PINPOINT_HEALTH_MONITOR = true;
 
     /**
+     * Whether to enable field boundary checking for Pinpoint odometry.
+     * <p>
+     * When enabled, Pinpoint readings outside field bounds are considered invalid
+     * to prevent impossible positions from corrupting the localization estimate.
+     * </p>
+     * <p>
+     * This can happen if deadwheels slip excessively or if Pinpoint malfunctions.
+     * </p>
+     */
+    public static final boolean ENABLE_PINPOINT_BOUNDARY_CHECK = true;
+
+    /**
      * Maximum allowed deviation between Pinpoint and fused pose before marking as unhealthy (inches).
      * <p>
      * If Pinpoint deviates from the fused pose estimate by more than this amount, it's
