@@ -4,6 +4,36 @@ All notable changes to the ARES FTC robot code will be documented in this file.
 
 ## [Unreleased] - 2026-03-30
 
+### 🔧 Added - Sensor Integration Systems
+
+#### VL53L5CX Time-of-Flight Distance Sensor
+- **Complete Driver**: Full I2C driver for VL53L5CX multi-zone ToF sensor
+- **8×8 Zone Matrix**: 64 individual distance measurements for spatial awareness
+- **Range**: Up to 4 meters (13 feet) with ±3% accuracy
+- **Refresh Rate**: Configurable 1-60Hz
+- **SRS Hub Integration**: Connects via I2C to SRS Hub
+
+#### GamePieceDetector.java - Intake Detection System
+- **Auto-Intake Detection**: Detects game pieces in intake zone (300mm threshold)
+- **Center Detection**: Determines if game piece is centered for proper indexing
+- **Multiple Piece Detection**: Detects when multiple pieces are present (spike detection)
+- **Direction Guidance**: Provides strafe direction to center game piece
+- **4×4 Resolution**: Faster processing with wider zones for intake
+
+#### BackdropAligner.java - Scoring Alignment System
+- **Distance Measurement**: Measures exact distance to backdrop for scoring
+- **Parallel Detection**: Detects if robot is aligned perpendicular to backdrop
+- **Auto-Alignment**: Calculates rotation adjustment for perfect scoring position
+- **Optimal Position**: Detects when at correct scoring distance (100mm ±20mm)
+- **8×8 Resolution**: Detailed zone data for precise alignment
+
+#### Limelight3A Object Detection System
+- **Color Detection**: Complete guide for detecting colored game pieces using HSV filtering
+- **Pipeline Setup**: Step-by-step pipeline configuration instructions
+- **Auto-Alignment**: ObjectDetection subsystem for automatic target alignment
+- **Distance Estimation**: Trigonometry-based distance calculation
+- **Test OpMode**: Interactive OpMode for testing and calibration
+
 ### 🚀 Added - Pedro Pathing Autonomous Integration
 
 #### BaseAuto.java - Complete Autonomous Implementation
@@ -31,7 +61,7 @@ All notable changes to the ARES FTC robot code will be documented in this file.
   - Limelight Poll Rate: 50Hz (2-3ms savings, was 100Hz)
   - Vision Update Frequency: Every other loop (1-2ms savings)
   - Voltage Cache: Read every 10 loops (0.1ms savings)
-  - PhotonCore Parallel Commands: Increased to 16 (1-2ms savings, was 8)
+  - PhotonCore Parallel Commands: Set to 12 for safety (1-2ms savings, reduced from 16)
   - Vision Adaptive Priority: Disabled (0.5ms savings)
 
 #### Drive.java - I2C Optimization
@@ -125,7 +155,17 @@ public static final boolean PERFORMANCE_MODE = false;  // All features enabled
 - `TeamCode/src/main/java/org/firstinspires/ftc/teamcode/commandbase/subsystems/Vision.java` (+12 lines)
 - `TeamCode/src/main/java/org/firstinspires/ftc/teamcode/globals/Robot.java` (+4 lines)
 
-**Total Changes**: 430 insertions(+), 117 deletions(-)
+### 📁 New Sensor Files
+
+- `TeamCode/src/main/java/org/firstinspires/ftc/teamcode/util/VL53L5CX.java` (NEW) - VL53L5CX driver
+- `TeamCode/src/main/java/org/firstinspires/ftc/teamcode/util/GamePieceDetector.java` (NEW) - Intake detection
+- `TeamCode/src/main/java/org/firstinspires/ftc/teamcode/util/BackdropAligner.java` (NEW) - Scoring alignment
+- `TeamCode/src/main/java/org/firstinspires/ftc/teamcode/samples/VL53L5CXSample.java` (NEW) - Sensor test OpMode
+- `TeamCode/src/main/java/org/firstinspires/ftc/teamcode/commandbase/subsystems/ObjectDetection.java` (NEW) - Limelight object detection
+- `TeamCode/src/main/java/org/firstinspires/ftc/teamcode/samples/ObjectDetectionSample.java` (NEW) - Detection test OpMode
+- `LIMELIGHT_DETECTION_GUIDE.md` (NEW) - Complete object detection guide
+
+**Total Changes**: 430 insertions(+), 117 deletions(-) + ~2,000 new lines of sensor code
 
 ---
 
