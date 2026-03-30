@@ -1,0 +1,209 @@
+<html>
+<head>
+<title>ARES FTC Robot Code Overview</title>
+</head>
+<body>
+
+<h1>ARES FTC Robot Code Documentation</h1>
+
+<p>
+Welcome to the ARES FTC robot code documentation. This codebase implements a command-based
+architecture for swerve drive with advanced sensor fusion and vision localization.
+</p>
+
+<h2>Architecture Overview</h2>
+
+<p>
+The robot code is organized into several key packages:
+</p>
+
+<ul>
+  <li><b>{@link org.firstinspires.ftc.teamcode.commandbase}:</b> Command-based framework
+      with subsystems and commands for robot control</li>
+  <li><b>{@link org.firstinspires.ftc.teamcode.globals}:</b> Global configuration including
+      robot constants and hardware definitions</li>
+  <li><b>{@link org.firstinspires.ftc.teamcode.util}:</b> Utility classes for motor control,
+      sensor fusion, data logging, and calibration</li>
+  <li><b>{@link org.firstinspires.ftc.teamcode.hardware}:</b> Hardware drivers for custom
+      devices like the SRS Hub</li>
+  <li><b>{@link org.firstinspires.ftc.teamcode.opmode}:</b> FTC OpModes for autonomous
+      and teleop control</li>
+  <li><b>{@link org.firstinspires.ftc.teamcode.auto}:</b> Autonomous tuning and
+      calibration routines</li>
+  <li><b>{@link org.firstinspires.ftc.teamcode.calibration}:</b> Sensor and vision
+      calibration OpModes</li>
+</ul>
+
+<h2>Key Components</h2>
+
+<h3>Swerve Drive System</h3>
+
+<p>
+The robot uses an octo-swerve drive configuration with four independently controlled
+modules. Each module can rotate its wheel direction (steering) and drive at variable speeds.
+Key classes:
+</p>
+
+<ul>
+  <li>{@link org.firstinspires.ftc.teamcode.commandbase.subsystems.swerve.OctoSwerveDrivetrainV2}:
+      Main drivetrain controller</li>
+  <li>{@link org.firstinspires.ftc.teamcode.commandbase.subsystems.swerve.OctoSwerveModuleV2}:
+      Individual swerve module with feedforward and PID control</li>
+  <li>{@link org.firstinspires.ftc.teamcode.commandbase.subsystems.swerve.encoders.SwerveEncoder}:
+      Swerve encoder interface with multiple implementations</li>
+</ul>
+
+<h3>Motor Control</h3>
+
+<p>
+Advanced motor control techniques ensure smooth, efficient operation:
+</p>
+
+<ul>
+  <li>{@link org.firstinspires.ftc.teamcode.util.SlewRateLimiter}: Prevents sudden power
+      changes that cause current spikes</li>
+  <li>{@link org.firstinspires.ftc.teamcode.util.CurrentLimiter}: Monitors current draw
+      and scales motor power to prevent tripping the 20A fuse</li>
+</ul>
+
+<h3>Sensor Fusion</h3>
+
+<p>
+Multiple sensors are combined using an Extended Kalman Filter for accurate localization:
+</p>
+
+<ul>
+  <li><b>Swerve Odometry:</b> Position estimation from wheel encoders</li>
+  <li><b>GoBilda Pinpoint:</b> Deadwheel odometry with IMU sensor fusion</li>
+  <li><b>Limelight Vision:</b> AprilTag-based vision localization with multi-camera fusion</li>
+  <li>{@link org.firstinspires.ftc.teamcode.util.SensorFusionLocalizer}: Combines all
+      sensors using EKF</li>
+</ul>
+
+<h3>Configuration</h3>
+
+<p>
+All robot-specific constants are centralized in:
+</p>
+
+<ul>
+  <li>{@link org.firstinspires.ftc.teamcode.globals.Constants}: Physical dimensions,
+      PIDF coefficients, feedforward constants, and tuning parameters</li>
+  <li>{@link org.firstinspires.ftc.teamcode.globals.Robot}: Robot singleton with hardware
+      initialization and subsystem access</li>
+</ul>
+
+<h2>Getting Started</h2>
+
+<h3>For New Developers</h3>
+
+<ol>
+  <li>Review the {@link org.firstinspires.ftc.teamcode.globals.Constants} class to understand
+      robot configuration</li>
+  <li>Study {@link org.firstinspires.ftc.teamcode.commandbase.subsystems.Drive} to see
+      how the drive subsystem integrates everything</li>
+  <li>Examine {@link org.firstinspires.ftc.teamcode.commandbase.commands.TeleOpDrive} for
+      an example of a command implementation</li>
+  <li>Check {@link org.firstinspires.ftc.teamcode.opmode.BaseTeleOp} for the standard
+      TeleOp OpMode structure</li>
+</ol>
+
+<h3>For Tuning and Calibration</h3>
+
+<p>
+The codebase includes comprehensive tuning and calibration tools:
+</p>
+
+<ul>
+  <li>{@link org.firstinspires.ftc.teamcode.auto.AutoTuneFeedforward}: Automatically
+      tune kS and kV feedforward constants</li>
+  <li>{@link org.firstinspires.ftc.teamcode.auto.AutoTuneSteering}: Automatically tune
+      steering PID</li>
+  <li>{@link org.firstinspires.ftc.teamcode.util.SteeringTuner}: Manual steering PID
+      tuning with real-time feedback</li>
+  <li>{@link org.firstinspires.ftc.teamcode.util.FeedforwardTuner}: Manual feedforward
+      tuning with velocity testing</li>
+  <li>{@link org.firstinspires.ftc.teamcode.calibration.LimelightCalibrationOpMode}:
+      Calibrate camera mount position and orientation</li>
+</ul>
+
+<h2>Control Theory</h2>
+
+<h3>Feedforward Control</h3>
+
+<p>
+The swerve drive uses feedforward control to compensate for friction and maintain target speeds:
+</p>
+
+<pre>
+motorPower = kS × sign(velocity) + kV × velocity
+</pre>
+
+<ul>
+  <li><b>kS (Static Friction):</b> Minimum power to overcome friction</li>
+  <li><b>kV (Velocity Constant):</b> Power to maintain velocity</li>
+</ul>
+
+<h3>PID Control</h3>
+
+<p>
+PID feedback corrects errors between target and actual states:
+</p>
+
+<pre>
+correction = Kp × error + Ki × ∫error dt + Kd × d(error)/dt
+</pre>
+
+<h3>Current Limiting</h3>
+
+<p>
+To prevent tripping the 20A fuse, the drivetrain uses:
+</p>
+
+<ul>
+  <li><b>Slew Rate Limiting:</b> Prevents rapid power changes</li>
+  <li><b>Current Monitoring:</b> Scales down power when approaching limits</li>
+  <li><b>Soft Recovery:</b> Gradually restores power when current drops</li>
+</ul>
+
+<h2>Telemetry and Logging</h2>
+
+<p>
+Comprehensive telemetry and data logging are available:
+</p>
+
+<ul>
+  <li>{@link org.firstinspires.ftc.teamcode.util.DataLogger}: CSV logging to disk for
+      post-match analysis</li>
+  <li>FTC Dashboard integration for real-time visualization</li>
+  <li>Per-module motor power breakdown (feedforward, PID, total)</li>
+  <li>Battery voltage monitoring</li>
+  <li>Loop timing and performance metrics</li>
+</ul>
+
+<h2>Hardware Requirements</h2>
+
+<ul>
+  <li><b>Control Hub:</b> FTC Robot Controller (Rev Control Hub or similar)</li>
+  <li><b>Drive Motors:</b> 4x brushless motors with encoders</li>
+  <li><b>Steering Servos:</b> 4x high-torque servos (e.g., Melon Super Servo)</li>
+  <li><b>Encoders:</b> OctoQuad or analog absolute encoders for steering</li>
+  <li><b>IMU:</b> Built-in Control Hub IMU or external IMU</li>
+  <li><b>Odometry:</b> GoBilda Pinpoint or SRS Hub with deadwheels</li>
+  <li><b>Vision:</b> Limelight3A camera(s) for AprilTag localization</li>
+</ul>
+
+<h2>Support</h2>
+
+<p>
+For questions or issues, please refer to:
+</p>
+
+<ul>
+  <li><a href="https://github.com/DigitalChickenLabs/OctoQuad">OctoQuad Documentation</a></li>
+  <li><a href="https://github.com/FIRST-Tech-Challenge/FtcRobotController">FTC SDK</a></li>
+  <li><a href="https://github.com/CommonWealthRobotics/CommonWealthRobotics-Training">Pedro Pathing</a></li>
+</ul>
+
+</body>
+</html>

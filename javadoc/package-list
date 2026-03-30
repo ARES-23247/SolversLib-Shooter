@@ -1,0 +1,11 @@
+org.firstinspires.ftc.teamcode.auto
+org.firstinspires.ftc.teamcode.calibration
+org.firstinspires.ftc.teamcode.commandbase.commands
+org.firstinspires.ftc.teamcode.commandbase.subsystems
+org.firstinspires.ftc.teamcode.commandbase.subsystems.swerve
+org.firstinspires.ftc.teamcode.commandbase.subsystems.swerve.encoders
+org.firstinspires.ftc.teamcode.globals
+org.firstinspires.ftc.teamcode.hardware
+org.firstinspires.ftc.teamcode.opmode
+org.firstinspires.ftc.teamcode.pedroPathing
+org.firstinspires.ftc.teamcode.util

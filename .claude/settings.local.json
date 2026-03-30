@@ -1,7 +1,11 @@
 {
   "permissions": {
     "allow": [
-      "Bash(wc:*)"
+      "Bash(wc:*)",
+      "WebSearch",
+      "Bash(curl -s \"https://api.github.com/repos/Simple-Robotics-System/SRSHub-Firmware/contents/src\")",
+      "Bash(curl -s \"https://api.github.com/repos/Simple-Robotics-System/SRSHub-Firmware/contents/src/java\")",
+      "Bash(curl -s \"https://raw.githubusercontent.com/Simple-Robotics-System/SRSHub-Firmware/main/src/java/SRSHub.java\")"
     ]
   }
 }
