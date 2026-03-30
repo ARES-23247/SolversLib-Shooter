@@ -20,19 +20,26 @@ import org.firstinspires.ftc.teamcode.globals.Robot;
  *
  * <p><b>Key Responsibilities:</b></p>
  * <ul>
- *   <li>Initialize robot hardware and subsystems</li>
- *   <li>Bind default commands to subsystems</li>
- *   <li>Run the command scheduler every loop iteration</li>
- *   <li>Clear PhotonCore bulk caches</li>
- *   <li>Provide loop timing telemetry</li>
+ *   <li>Initialize robot hardware via {@link Robot#init(HardwareMap)}</li>
+ *   <li>Bind the TeleOpDrive command as the default command for the drive subsystem</li>
+ *   <li>Execute robot update loop via {@link Robot#updateLoop(TelemetryData)}</li>
+ *   <li>Display loop timing telemetry for performance monitoring</li>
  * </ul>
  *
- * <p><b>Operation:</b> The TeleOpDrive command is bound as the default command for the
- * drive subsystem, enabling continuous driver control via gamepad1. Field-centric driving
- * is enabled to simplify control for drivers.</p>
+ * <p><b>Operation:</b></p>
+ * <ol>
+ *   <li><b>Initialization:</b> Calls {@code robot.init(hardwareMap)} to initialize all hardware,
+ *       subsystems, and PhotonCore bulk caching</li>
+ *   <li><b>Default Command:</b> Binds {@link TeleOpDrive} to the drive subsystem, enabling
+ *       continuous driver control via gamepad1 with field-centric driving and throttle control</li>
+ *   <li><b>Update Loop:</b> Calls {@code robot.updateLoop(telemetryData)} which runs the command
+ *       scheduler, updates subsystems, clears PhotonCore caches, and outputs telemetry</li>
+ *   <li><b>Telemetry:</b> Outputs to both driver station and FTC Dashboard via MultipleTelemetry</li>
+ * </ol>
  *
- * <p><b>Telemetry:</b> Sends telemetry to both the driver station phone and FTC Dashboard
- * via MultipleTelemetry for dual output.</p>
+ * <p><b>Delegation:</b> This OpMode delegates hardware management, command scheduling, and
+ * bulk cache operations to {@link Robot}. See {@link Robot} class documentation for details
+ * on those responsibilities.</p>
  *
  * @see com.seattlesolvers.solverslib.command.CommandOpMode
  * @see org.firstinspires.ftc.teamcode.commandbase.commands.TeleOpDrive
@@ -65,9 +72,9 @@ public class BaseTeleOp extends CommandOpMode {
      * <p>This method is called once when the OpMode is initialized. It performs the following:</p>
      * <ol>
      *   <li>Resets the command scheduler to clear any previous state</li>
-     *   <li>Initializes all robot hardware via {@link Robot#init(HardwareMap)}</li>
-     *   <li>Sets up telemetry output</li>
-     *   <li>Binds the TeleOpDrive command as the default command for the drive subsystem</li>
+     *   <li>Initializes robot hardware by calling {@link Robot#init(HardwareMap)}</li>
+     *   <li>Sets up telemetry output with MultipleTelemetry for dual output</li>
+     *   <li>Binds the {@link TeleOpDrive} command as the default command for the drive subsystem</li>
      * </ol>
      *
      * <p><b>Default Command:</b> The TeleOpDrive command is bound to the drive subsystem,

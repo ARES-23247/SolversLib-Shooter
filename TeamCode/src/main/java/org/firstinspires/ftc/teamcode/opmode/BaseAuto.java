@@ -266,7 +266,7 @@ public class BaseAuto extends CommandOpMode {
      * <p>This method is called once when the OpMode is initialized. It performs the following:</p>
      * <ol>
      *   <li>Resets the command scheduler to clear any previous state</li>
-     *   <li>Initializes all robot hardware via {@link Robot#init(HardwareMap)}</li>
+     *   <li>Initializes robot hardware by calling {@link Robot#init(HardwareMap)}</li>
      *   <li>Gets the Drive subsystem with integrated PedroPathing follower</li>
      *   <li>Sets the starting pose for the robot</li>
      *   <li>Builds all autonomous path chains</li>
