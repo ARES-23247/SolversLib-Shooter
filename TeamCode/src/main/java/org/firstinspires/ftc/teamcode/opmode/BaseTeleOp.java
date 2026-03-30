@@ -114,6 +114,7 @@ public class BaseTeleOp extends CommandOpMode {
      * It performs the following operations:</p>
      * <ol>
      *   <li>Measures and reports loop execution time for performance monitoring</li>
+     *   <li>Outputs TeleOpDrive telemetry (throttle, button states, heading resets)</li>
      *   <li>Runs the robot's update loop which includes:
      *       <ul>
      *         <li>Command scheduler execution</li>
@@ -140,6 +141,13 @@ public class BaseTeleOp extends CommandOpMode {
 
         telemetryData.addData("Loop Time", timer.milliseconds());
         timer.reset();
+
+        // Output TeleOpDrive telemetry (throttle, buttons, heading resets)
+        if (robot.drive.getDefaultCommand() instanceof org.firstinspires.ftc.teamcode.commandbase.commands.TeleOpDrive) {
+            org.firstinspires.ftc.teamcode.commandbase.commands.TeleOpDrive driveCommand =
+                (org.firstinspires.ftc.teamcode.commandbase.commands.TeleOpDrive) robot.drive.getDefaultCommand();
+            driveCommand.outputTelemetry(telemetryData);
+        }
 
         // Run the master loop which ticks subsystems, command scheduler, and clears bulk cache
         robot.profiler.start("Run + Update");

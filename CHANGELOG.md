@@ -4,6 +4,43 @@ All notable changes to the ARES FTC robot code will be documented in this file.
 
 ## [Unreleased] - 2026-03-30
 
+### 🎮 Added - TeleOp Drive Enhancements
+
+#### Speed Throttle Control
+- **Right Trigger Throttle**: Dynamic speed control from 50% to 100%
+- **Base Speed**: 50% speed when trigger released for precise control
+- **Full Speed**: 100% speed when trigger fully pressed
+- **All Axes Applied**: Throttle affects forward, strafe, and rotation equally
+- **Formula**: `speedScale = 0.5 + (right_trigger × 0.5)`
+
+#### Heading Reset System
+- **Y Button Reset**: Press Y to reset field-centric heading to current orientation
+- **Rising Edge Detection**: Only resets on button press, not continuous
+- **Pose Preservation**: Maintains x, y position while resetting heading to 0
+- **Field-Centric Only**: Active only when field-centric mode is enabled
+- **Event Tracking**: Counts reset events and timestamps for debugging
+
+#### Comprehensive Telemetry
+- **Real-Time Speed Display**: Shows current speed percentage (50-100%)
+- **Throttle Position**: Right trigger value displayed (0-100%)
+- **Button State Logging**: Y button press state and reset counter
+- **Time Tracking**: Shows time elapsed since last heading reset
+- **Input Values**: Raw forward, lateral, and turn inputs after scaling
+- **Drive Mode Indicator**: Displays Field-Centric or Robot-Centric mode
+
+#### TeleOpDrive.java Updates
+- **Speed Scale Tracking**: New `lastSpeedScale` field with getter methods
+- **Reset Event Counter**: `headingResetCount` tracks total reset events
+- **Timestamp Tracking**: `lastHeadingResetTime` and `resetTimer` for event timing
+- **Telemetry Output**: `outputTelemetry()` method for comprehensive logging
+- **Throttle Getter**: `getThrottleInput()` for current trigger value
+- **Speed Percentage**: `getSpeedPercentage()` converts scale to percentage
+
+#### BaseTeleOp.java Updates
+- **Automatic Telemetry**: Calls `outputTelemetry()` every loop iteration
+- **Type Safety**: Checks command type before casting for telemetry output
+- **Loop Integration**: Telemetry runs before robot update loop for consistent timing
+
 ### 🔧 Added - Sensor Integration Systems
 
 #### VL53L5CX Time-of-Flight Distance Sensor
@@ -149,6 +186,11 @@ public static final boolean PERFORMANCE_MODE = false;  // All features enabled
 
 ### 📁 Modified Files
 
+#### TeleOp Enhancements
+- `TeamCode/src/main/java/org/firstinspires/ftc/teamcode/commandbase/commands/TeleOpDrive.java` (+168 lines) - Speed throttle, heading reset, comprehensive telemetry
+- `TeamCode/src/main/java/org/firstinspires/ftc/teamcode/opmode/BaseTeleOp.java` (+8 lines) - Automatic telemetry output integration
+
+#### Autonomous & Performance
 - `TeamCode/src/main/java/org/firstinspires/ftc/teamcode/opmode/BaseAuto.java` (+342 lines)
 - `TeamCode/src/main/java/org/firstinspires/ftc/teamcode/globals/Constants.java` (+157 lines)
 - `TeamCode/src/main/java/org/firstinspires/ftc/teamcode/commandbase/subsystems/Drive.java` (+32 lines)
@@ -165,7 +207,7 @@ public static final boolean PERFORMANCE_MODE = false;  // All features enabled
 - `TeamCode/src/main/java/org/firstinspires/ftc/teamcode/samples/ObjectDetectionSample.java` (NEW) - Detection test OpMode
 - `LIMELIGHT_DETECTION_GUIDE.md` (NEW) - Complete object detection guide
 
-**Total Changes**: 430 insertions(+), 117 deletions(-) + ~2,000 new lines of sensor code
+**Total Changes**: 598 insertions(+), 117 deletions(-) + ~2,000 new lines of sensor code
 
 ---
 
