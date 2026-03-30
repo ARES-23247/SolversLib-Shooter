@@ -95,11 +95,14 @@ public class Constants {
     /**
      * PhotonCore maximum parallel commands.
      * <p>
-     * <b>Performance Mode:</b> 16 (maximize I2C parallelization - saves 1-2ms)</p>
+     * <b>Performance Mode:</b> 12 (fast but safe I2C parallelization - saves 1-2ms)</p>
      * <p>
      * <b>Tuning Mode:</b> 8 (moderate parallelization - safer)</p>
+     *
+     * <p><b>Safety Note:</b> 12 is the sweet spot - fast like 16 but with much lower risk of
+     * I2C buffer overflow or command loss during competition. Values above 12 are aggressive.</p>
      */
-    public static final int PHOTON_PARALLEL_COMMANDS = PERFORMANCE_MODE ? 16 : 8;
+    public static final int PHOTON_PARALLEL_COMMANDS = PERFORMANCE_MODE ? 12 : 8;
 
     /**
      * Whether to enable dashboard field overlay.
