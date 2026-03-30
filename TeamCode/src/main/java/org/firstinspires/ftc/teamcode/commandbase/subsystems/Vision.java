@@ -96,6 +96,11 @@ public class Vision extends SubsystemBase {
     private List<LimelightCamera> activeCameras = new ArrayList<>();
 
     /**
+     * Loop counter for vision update throttling (update vision every N loops for performance).
+     */
+    private int visionLoopCounter = 0;
+
+    /**
      * Constructs the Vision subsystem.
      */
     public Vision() {
@@ -119,6 +124,13 @@ public class Vision extends SubsystemBase {
         if (robot.limelightCameras == null || robot.limelightCameras.length == 0) {
             return;  // No cameras configured
         }
+
+        // Vision update throttling for performance (update every N loops)
+        visionLoopCounter++;
+        if (visionLoopCounter < VISION_UPDATE_FREQUENCY) {
+            return;  // Skip this vision update
+        }
+        visionLoopCounter = 0;
 
         // Step 1: Update all cameras with calibration data
         isAnyTagVisible = false;

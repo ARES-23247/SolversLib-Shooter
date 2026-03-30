@@ -362,7 +362,7 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
         // ---------------------------------------------
         PhotonCore.CONTROL_HUB.setBulkCachingMode(LynxModule.BulkCachingMode.MANUAL);
         PhotonCore.EXPANSION_HUB.setBulkCachingMode(LynxModule.BulkCachingMode.MANUAL);
-        PhotonCore.experimental.setMaximumParallelCommands(8);
+        PhotonCore.experimental.setMaximumParallelCommands(org.firstinspires.ftc.teamcode.globals.Constants.PHOTON_PARALLEL_COMMANDS);
 
         // Enable parallel servo updates for faster loop times (~3-6ms improvement)
         // All servos are on USB-connected hubs, so this is safe to enable
@@ -408,7 +408,7 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
 
         for (int i = 0; i < cameraNames.length; i++) {
             Limelight3A ll = hwMap.get(Limelight3A.class, cameraNames[i]);
-            ll.setPollRateHz(100);  // Reduced from 250Hz for lower I2C overhead
+            ll.setPollRateHz(org.firstinspires.ftc.teamcode.globals.Constants.LIMELIGHT_POLL_RATE);
             ll.pipelineSwitch(0);
             ll.start();
 

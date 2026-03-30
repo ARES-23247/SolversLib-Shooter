@@ -179,6 +179,16 @@ public class Drive extends SubsystemBase {
     private double batteryVoltage = 13.0;  // Default estimate
 
     /**
+     * Loop counter for voltage caching (read voltage every N loops).
+     */
+    private int voltageLoopCounter = 0;
+
+    /**
+     * Loop counter for vision update throttling (update vision every N loops).
+     */
+    private int visionLoopCounter = 0;
+
+    /**
      * Constructs the Drive subsystem and initializes all components.
      *
      * <p>This constructor:</p>
@@ -441,12 +451,16 @@ public class Drive extends SubsystemBase {
         // ===== Loop Timing =====
         loopStartTime = System.nanoTime() / 1e9;  // Convert to seconds
 
-        // Read battery voltage (real-time, not cached)
-        if (robot.voltageSensor != null) {
-            batteryVoltage = robot.voltageSensor.getVoltage();
-            if (Double.isNaN(batteryVoltage) || batteryVoltage == 0) {
-                batteryVoltage = 13.0;  // Default if sensor fails
+        // Read battery voltage (cached for performance)
+        voltageLoopCounter++;
+        if (voltageLoopCounter >= org.firstinspires.ftc.teamcode.globals.Constants.VOLTAGE_CACHE_DURATION) {
+            if (robot.voltageSensor != null) {
+                batteryVoltage = robot.voltageSensor.getVoltage();
+                if (Double.isNaN(batteryVoltage) || batteryVoltage == 0) {
+                    batteryVoltage = 13.0;  // Default if sensor fails
+                }
             }
+            voltageLoopCounter = 0;
         }
 
         // ===== 1. Sensor Fusion EKF Cycle =====
@@ -563,14 +577,6 @@ public class Drive extends SubsystemBase {
                                   robot.isLocalizerReady();
         if (localizerReady) {
             localizerData = robot.getLocalizerData();
-        }
-
-        // Read SRS Hub current data once per loop (avoid redundant I2C reads)
-        double currentDraw = 0.0;
-        boolean srsHubReady = robot.org.firstinspires.ftc.teamcode.globals.Constants.SRS_HUB_ENABLED &&
-                              robot.srsHub != null;
-        if (srsHubReady) {
-            currentDraw = robot.getCurrentDraw();
         }
 
         // Dashboard Telemetry & Field Drawing (only if enabled in Constants)
