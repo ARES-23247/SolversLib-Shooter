@@ -514,7 +514,7 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
      * </ul>
      *
      * @see org.firstinspires.ftc.teamcode.globals.Constants#LOCALIZER_ENABLED
-     * @see org.firstinspires.ftc.teamcode.util.OctoQuadFWv3#resetLocalizerAndCalibrateIMU()
+     * @see org.firstinspires.ftc.teamcode.util.drivers.OctoQuadFWv3#resetLocalizerAndCalibrateIMU()
      */
     private void initializeOctoQuadLocalizer() {
         if (!org.firstinspires.ftc.teamcode.globals.Constants.LOCALIZER_ENABLED) {
@@ -580,10 +580,10 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
      * <p>This method checks the status of the OctoQuad localizer algorithm.</p>
      *
      * @return LocalizerStatus enum value (NOT_INITIALIZED, WARMING_UP_IMU, CALIBRATING_IMU, RUNNING, FAULT_NO_IMU)
-     * @see org.firstinspires.ftc.teamcode.util.OctoQuadFWv3.LocalizerStatus
+     * @see org.firstinspires.ftc.teamcode.util.drivers.OctoQuadFWv3.LocalizerStatus
      */
-    public org.firstinspires.ftc.teamcode.util.OctoQuadFWv3.LocalizerStatus getLocalizerStatus() {
-        if (octoquad == null) return org.firstinspires.ftc.teamcode.util.OctoQuadFWv3.LocalizerStatus.NOT_INITIALIZED;
+    public org.firstinspires.ftc.teamcode.util.drivers.OctoQuadFWv3.LocalizerStatus getLocalizerStatus() {
+        if (octoquad == null) return org.firstinspires.ftc.teamcode.util.drivers.OctoQuadFWv3.LocalizerStatus.NOT_INITIALIZED;
         return octoquad.getLocalizerStatus();
     }
 
@@ -594,9 +594,9 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
      * localizer. The data includes CRC validation for reliability.</p>
      *
      * @return LocalizerDataBlock containing position (mm), heading (rad), and velocity data
-     * @see org.firstinspires.ftc.teamcode.util.OctoQuadFWv3.LocalizerDataBlock
+     * @see org.firstinspires.ftc.teamcode.util.drivers.OctoQuadFWv3.LocalizerDataBlock
      */
-    public org.firstinspires.ftc.teamcode.util.OctoQuadFWv3.LocalizerDataBlock getLocalizerData() {
+    public org.firstinspires.ftc.teamcode.util.drivers.OctoQuadFWv3.LocalizerDataBlock getLocalizerData() {
         if (octoquad == null) return null;
         return octoquad.readLocalizerData();
     }
@@ -609,7 +609,7 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
      * @return heading in radians, or 0.0 if localizer is not available or data is invalid
      */
     public double getIMUHeading() {
-        org.firstinspires.ftc.teamcode.util.OctoQuadFWv3.LocalizerDataBlock data = getLocalizerData();
+        org.firstinspires.ftc.teamcode.util.drivers.OctoQuadFWv3.LocalizerDataBlock data = getLocalizerData();
         if (data != null && data.isPoseDataValid()) {
             return data.heading_rad;
         }
@@ -622,7 +622,7 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
      * @return true if localizer status is RUNNING and CRC validation passes
      */
     public boolean isLocalizerReady() {
-        org.firstinspires.ftc.teamcode.util.OctoQuadFWv3.LocalizerDataBlock data = getLocalizerData();
+        org.firstinspires.ftc.teamcode.util.drivers.OctoQuadFWv3.LocalizerDataBlock data = getLocalizerData();
         return data != null && data.isPoseDataValid();
     }
 

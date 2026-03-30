@@ -143,7 +143,6 @@ public class AutoTuneSteering extends LinearOpMode {
 
 
         
-`
         // Wait for start
         waitForStart();
 
