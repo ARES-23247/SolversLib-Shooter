@@ -274,31 +274,50 @@ public class OctoSwerveModule {
     /**
      * Gets the current drive wheel velocity in inches per second.
      *
-     * <p>This method converts the raw OctoQuad velocity reading (ticks/second) to
-     * physical units (inches/second) for meaningful telemetry and control.</p>
+     * <p>This method converts the raw OctoQuad velocity reading (ticks/second at the motor) to
+     * physical units (inches/second at the wheel) accounting for gear reduction.</p>
      *
-     * <h3>Conversion Factor:</h3>
-     * <p>The current implementation uses a placeholder factor of 0.001. For accurate
-     * velocity control, replace with:</p>
+     * <h3>Conversion Formula:</h3>
+     * <p>Uses the physical wheel and gear parameters from {@link org.firstinspires.ftc.teamcode.globals.Constants#VELOCITY_CONVERSION}:</p>
      * <pre>
-     * WHEEL_CIRCUMFERENCE_INCHES / TICKS_PER_REVOLUTION
-     * = (2 * π * WHEEL_RADIUS) / TICKS_PER_REV
-     * </pre>
-     * <p>Example for 2-inch radius wheel with 8192 ticks/rev:</p>
-     * <pre>
-     * conversion = (2 * π * 2) / 8192 = 0.001534
+     * velocity_inches_per_sec = motor_ticks_per_sec × VELOCITY_CONVERSION
+     * = motor_ticks_per_sec × (WHEEL_CIRCUMFERENCE / TOTAL_GEAR_RATIO) / OCTOQUAD_CPR
      * </pre>
      *
-     * <p><b>Tuning Note:</b> An incorrect conversion factor will cause the drive PIDF
-     * controller to behave poorly. Calibrate this for accurate velocity control.</p>
+     * <p><b>Your Gearbox:</b></p>
+     * <ul>
+     *   <li>Motor: GoBilda 5.18:1 internal ratio</li>
+     *   <li>Stage 1: 36:24 (1.5:1 reduction)</li>
+     *   <li>Stage 2: 2:1 reduction</li>
+     *   <li>Total: 15.54:1 gear reduction</li>
+     * </ul>
+     *
+     * <p><b>For 72mm wheels with your gearing:</b></p>
+     * <pre>
+     * Wheel circumference: 8.906 inches
+     * Effective circumference after gearing: 8.906 / 15.54 = 0.573 inches per motor rev
+     * Conversion: 0.573 / 8192 = 0.00007 inches/tick
+     * </pre>
+     *
+     * <p><b>Examples:</b></p>
+     * <ul>
+     *   <li>10,000 ticks/sec → 0.70 inches/sec</li>
+     *   <li>50,000 ticks/sec → 3.50 inches/sec</li>
+     *   <li>100,000 ticks/sec → 7.00 inches/sec</li>
+     * </ul>
+     *
+     * <p><b>Performance Note:</b> Due to the 15.54:1 gear reduction, you have high torque
+     * but lower top speed. The encoder reads motor speed, so the conversion must account
+     * for the gear ratio.</p>
      *
      * @return the current wheel velocity in inches/second
+     * @see org.firstinspires.ftc.teamcode.globals.Constants#VELOCITY_CONVERSION
+     * @see org.firstinspires.ftc.teamcode.globals.Constants#TOTAL_GEAR_RATIO
      * @see #updateModuleWithVelocity(Vector2d)
      */
     public double getCurrentVelocityInchesPerSec() {
-        // Approximate conversion using target vs tick comparison
-        // NOTE: Replace 0.001 with physical WHEEL_RADIUS * Math.PI * 2 / TICKS_PER_REV if known!
-        return currentVelocityTicksPerSec * 0.001;
+        // Convert motor ticks/sec to wheel inches/sec using gear ratio
+        return currentVelocityTicksPerSec * org.firstinspires.ftc.teamcode.globals.Constants.VELOCITY_CONVERSION;
     }
 
     /**

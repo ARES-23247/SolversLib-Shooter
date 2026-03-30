@@ -51,6 +51,156 @@ import com.qualcomm.robotcore.hardware.PIDFCoefficients;
  */
 public class Constants {
 
+    // ===== Wheel Configuration =====
+
+    /**
+     * Drive wheel diameter in millimeters.
+     * <p>
+     * <b>Common FTC wheel sizes:</b>
+     * <ul>
+     *   <li>GoBilda 96mm Mecanum wheels</li>
+     *   <li>GoBilda 72mm Omni wheels ← YOURS</li>
+     *   <li>GoBilda 100mm Mecanum wheels</li>
+     *   <li>Rev 96mm Omni wheels</li>
+     * </ul>
+     * </p>
+     */
+    public static final double WHEEL_DIAMETER_MM = 72.0;  // 72mm GoBilda Omni wheels
+
+    /**
+     * Drive wheel radius in inches.
+     * Calculated from wheel diameter.
+     */
+    public static final double WHEEL_RADIUS_INCHES = (WHEEL_DIAMETER_MM / 25.4) / 2.0;  // ~1.417 inches
+
+    /**
+     * Drive wheel circumference in inches.
+     * Used for velocity calculations: distance per wheel revolution.
+     */
+    public static final double WHEEL_CIRCUMFERENCE_INCHES = WHEEL_DIAMETER_MM / 25.4 * Math.PI;  // ~8.9 inches
+
+    // ===== Motor & Gearing Configuration =====
+
+    /**
+     * Motor internal gear ratio.
+     * <p>
+     * GoBilda 5202 series motor with 5.18:1 internal gear reduction.</p>
+     */
+    public static final double MOTOR_GEAR_RATIO = 5.18;
+
+    /**
+     * External gearing stage 1 (same-size sprockets).
+     * <p>
+     * Ratio = 30 / 30 = 1:1 (no reduction)
+     * Using 1:1 middle stage gives better top speed while maintaining precision.</p>
+     *
+     * <p><b>Your Configuration:</b></p>
+     * <ul>
+     *   <li>Driver: 30-tooth sprocket</li>
+     *   <li>Driven: 30-tooth sprocket</li>
+     *   <li>Ratio: 1:1 (no speed change)</li>
+     * </ul>
+     *
+     * <p><b>Alternative Options:</b></p>
+     * <ul>
+     *   <li>24:24 sprockets (1:1) - Smaller sprockets, lighter weight</li>
+     *   <li>36:36 sprockets (1:1) - Larger sprockets, more durable</li>
+     *   <li>36:24 sprockets (1.5:1) - Higher reduction, more torque, slower speed</li>
+     * </ul>
+     */
+    public static final double GEAR_STAGE_1_RATIO = 1.0;  // 1:1 (30:30)
+
+    /**
+     * External gearing stage 2 (2:1 sprockets or gears).
+     * <p>
+     * Ratio = 2:1 gear reduction</p>
+     */
+    public static final double GEAR_STAGE_2_RATIO = 2.0 / 1.0;  // 2:1
+
+    /**
+     * Total gear reduction from motor to wheel.
+     * <p>
+     * <b>Calculation (with 1:1 middle stage):</b></p>
+     * <pre>
+     * TOTAL_GEAR_RATIO = MOTOR_GEAR_RATIO × GEAR_STAGE_1_RATIO × GEAR_STAGE_2_RATIO
+     *                = 5.18 × 1.0 × 2.0
+     *                = 10.36:1
+     * </pre>
+     *
+     * <p>For every 10.36 motor revolutions, the wheel makes 1 revolution.</p>
+     *
+     * <p><b>Performance:</b></p>
+     * <ul>
+     *   <li>50% faster than 15.54:1 reduction</li>
+     *   <li>Still excellent precision for swerve drive</li>
+     *   <li>Good torque for most FTC applications</li>
+     * </ul>
+     *
+     * <p><b>Alternative Configurations:</b></p>
+     * <ul>
+     *   <li>36:24 (1.5:1) → 15.54:1 total (slower, more torque)</li>
+     *   <li>24:24 (1.0:1) → 10.36:1 total (current - recommended) ⭐</li>
+     *   <li>Direct drive → 5.18:1 total (fastest, less precision)</li>
+     * </ul>
+     */
+    public static final double TOTAL_GEAR_RATIO = MOTOR_GEAR_RATIO * GEAR_STAGE_1_RATIO * GEAR_STAGE_2_RATIO;  // 10.36:1
+
+    /**
+     * OctoQuad encoder counts per revolution (CPR).
+     * <p>
+     * The OctoQuad provides 8192 counts per revolution for quadrature encoders.
+     * This high resolution enables precise velocity control for swerve drive.</p>
+     *
+     * <p><b>Important:</b> The encoder is mounted on the MOTOR shaft, not the wheel shaft!</p>
+     */
+    public static final double OCTOQUAD_CPR = 8192.0;
+
+    /**
+     * Velocity conversion factor for drive motors.
+     * <p>
+     * Converts from OctoQuad ticks/second at the MOTOR to inches/second at the WHEEL,
+     * accounting for the gear reduction.</p>
+     *
+     * <p><b>Formula:</b></p>
+     * <pre>
+     * VELOCITY_CONVERSION = (WHEEL_CIRCUMFERENCE / TOTAL_GEAR_RATIO) / OCTOQUAD_CPR
+     *
+     * With 1:1 middle stage (10.36:1 total):
+     * = (8.906 inches / 10.36) / 8192
+     * = 0.859 inches per motor revolution / 8192 counts
+     * = 0.000105 inches per tick
+     * </pre>
+     *
+     * <p><b>Your Configuration (with 1:1 middle stage):</b></p>
+     * <ul>
+     *   <li>Motor: SWYFT 5.18:1</li>
+     *   <li>Stage 1: 24:24 or 36:36 (1:1) ← Same-size sprockets</li>
+     *   <li>Stage 2: 2:1</li>
+     *   <li>Total: 10.36:1</li>
+     *   <li>Wheels: 72mm (8.906" circumference)</li>
+     *   <li>Encoder: 8192 CPR (at motor)</li>
+     *   <li>Conversion: 0.000105 inches/tick</li>
+     * </ul>
+     *
+     * <p><b>Performance (50% faster than 15.54:1):</b></p>
+     * <ul>
+     *   <li>10,000 ticks/sec → 1.05 inches/sec</li>
+     *   <li>50,000 ticks/sec → 5.25 inches/sec</li>
+     *   <li>100,000 ticks/sec → 10.50 inches/sec</li>
+     * </ul>
+     *
+     * <p><b>Estimated Top Speed:</b></p>
+     * <ul>
+     *   <li>Motor max: ~6,000 RPM</li>
+     *   <li>Wheel max: 6,000 / 10.36 = 579 RPM</li>
+     *   <li>Wheel speed: 579 RPM × 8.906 in/rev = 85.4 in/sec ≈ **7.1 ft/sec**</li>
+     * </ul>
+     *
+     * <p><b>Trade-off:</b> 50% faster than 15.54:1, while maintaining excellent precision
+     * and still having good torque for swerve drive applications.</p>
+     */
+    public static final double VELOCITY_CONVERSION = (WHEEL_CIRCUMFERENCE_INCHES / TOTAL_GEAR_RATIO) / OCTOQUAD_CPR;  // ~0.000105
+
     // ===== ⚡ PERFORMANCE MODE =====
 
     /**
