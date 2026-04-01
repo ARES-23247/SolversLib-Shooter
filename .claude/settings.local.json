@@ -30,7 +30,8 @@
       "Bash(sed -i 's/package org\\\\.firstinspires\\\\.ftc\\\\.teamcode\\\\.command\\\\.subsystems/package org.firstinspires.ftc.teamcode.command.subsystems.vision/g' vision/*.java)",
       "Bash(head:*)",
       "Bash(mv BackdropAligner.java vision/)",
-      "Bash(mv GamePieceDetector.java vision/)"
+      "Bash(mv GamePieceDetector.java vision/)",
+      "Bash(find . -name *.json -o -name *dashboard* -o -name *Dashboard*)"
     ]
   }
 }

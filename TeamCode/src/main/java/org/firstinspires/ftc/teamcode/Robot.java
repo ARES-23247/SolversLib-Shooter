@@ -652,11 +652,10 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
                 averageLoopTimeMs = 0.1 * lastLoopTimeMs + 0.9 * averageLoopTimeMs;
             }
 
-            // Log loop times every 10 loops
-            if (loopCounter % 10 == 0) {
-                this.logger.addData("Loop Time (ms)", lastLoopTimeMs);
-                this.logger.addData("Avg Loop Time (ms)", averageLoopTimeMs);
-            }
+            // Log loop times every loop
+            this.logger.addData("Loop Time (ms)", lastLoopTimeMs);
+            this.logger.addData("Avg Loop Time (ms)", averageLoopTimeMs);
+            this.logger.addData("Loop Frequency (Hz)", 1.0 / Math.max(lastLoopTimeMs / 1000.0, 0.001));
         }
 
         loopCounter++;

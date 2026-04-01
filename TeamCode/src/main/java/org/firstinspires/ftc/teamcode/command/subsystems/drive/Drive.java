@@ -710,6 +710,12 @@ public class Drive extends SubsystemBase {
                             packet.put("Reset Check Uncertainty", String.format("%.2f in", maxUncertainty));
                             packet.put("Reset Check Vision", visionTagVisible ? "YES" : "NO");
                         }
+
+                        // Log IMU backup status
+                        if (OCTOQUAD_IMU_BACKUP_ENABLED) {
+                            packet.put("IMU Source", robot.getIMUSource());
+                            packet.put("OctoQuad IMU Offset (rad)", String.format("%.3f", robot.getOctoQuadIMUOffset()));
+                        }
                     }
                 }
             }
@@ -797,6 +803,19 @@ public class Drive extends SubsystemBase {
                         robot.logger.addData("Pinpoint Bad Count", pinpointHealthMonitor.getBadReadingCount());
                     }
                 }
+            }
+
+            // Log IMU backup status
+            if (OCTOQUAD_IMU_BACKUP_ENABLED) {
+                robot.logger.addData("IMU Source", robot.getIMUSource());
+                robot.logger.addData("OctoQuad IMU Offset (rad)", robot.getOctoQuadIMUOffset());
+            }
+
+            // Log Vision data
+            if (robot.vision != null) {
+                robot.logger.addData("Vision Tag Visible", robot.vision.isTagVisible() ? 1 : 0);
+                robot.logger.addData("Vision Active Cameras", robot.vision.getActiveCameras().size());
+                robot.logger.addData("Vision Healthy Cameras", robot.vision.getHealthyCameraCount());
             }
 
             swerve.logData(robot.logger);
