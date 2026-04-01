@@ -55,12 +55,13 @@ dependencies {
     implementation "org.solverslib:pedroPathing:0.3.4" // pedroPathing
     implementation "org.solverslib:photon:0.3.4" // photon is optional (see docs for more info)
 
-    implementation "com.acmerobotics.dashboard:dashboard:0.5.1" // FTC Dashboard
+    // FTC Dashboard (replaced with Panels)
+    // implementation "com.acmerobotics.dashboard:dashboard:0.5.1"
 
     // Pedro Pathing
     implementation 'com.pedropathing:ftc:2.0.6'
     implementation 'com.pedropathing:telemetry:1.0.0'
 
-    // Panels Dashboard
+    // Panels Dashboard (active)
     implementation "com.bylazar:fullpanels:1.0.12"
 }

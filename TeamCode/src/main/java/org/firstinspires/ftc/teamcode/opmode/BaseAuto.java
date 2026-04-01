@@ -1,8 +1,5 @@
 package org.firstinspires.ftc.teamcode.opmode;
 
-import com.acmerobotics.dashboard.FtcDashboard;
-import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
-
 import com.pedropathing.geometry.BezierCurve;
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
@@ -51,7 +48,7 @@ import org.firstinspires.ftc.teamcode.Robot;
  * in this OpMode - it's handled in {@link Drive#periodic()}.</p>
  *
  * @see com.seattlesolvers.solverslib.command.CommandOpMode
- * @see org.firstinspires.ftc.teamcode.commandbase.subsystems.Drive
+ * @see org.firstinspires.ftc.teamcode.command.subsystems.drive.Drive
  * @see <a href="https://pedropathing.com/ Pedro Pathing Documentation</a>
  */
 @Autonomous(name = "Base Auto", group = "Autonomous")
@@ -64,10 +61,10 @@ public class BaseAuto extends CommandOpMode {
     public ElapsedTime timer;
 
     /**
-     * Telemetry instance that sends data to both the driver station and FTC Dashboard.
-     * MultipleTelemetry allows simultaneous output to both destinations.
+     * Telemetry instance that sends data to the driver station.
+     * Panels web dashboard is updated separately by the Drive subsystem.
      */
-    TelemetryData telemetryData = new TelemetryData(new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry()));
+    TelemetryData telemetryData = new TelemetryData(telemetry);
 
     /**
      * Reference to the singleton robot instance.

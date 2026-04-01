@@ -1,8 +1,5 @@
 package org.firstinspires.ftc.teamcode.opmode;
 
-import com.acmerobotics.dashboard.FtcDashboard;
-import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
-
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.seattlesolvers.solverslib.command.CommandOpMode;
@@ -34,7 +31,7 @@ import org.firstinspires.ftc.teamcode.Robot;
  *       continuous driver control via gamepad1 with field-centric driving and throttle control</li>
  *   <li><b>Update Loop:</b> Calls {@code robot.updateLoop(telemetryData)} which runs the command
  *       scheduler, updates subsystems, clears PhotonCore caches, and outputs telemetry</li>
- *   <li><b>Telemetry:</b> Outputs to both driver station and FTC Dashboard via MultipleTelemetry</li>
+ *   <li><b>Telemetry:</b> Outputs to driver station. Panels web dashboard is updated by Drive subsystem.</li>
  * </ol>
  *
  * <p><b>Delegation:</b> This OpMode delegates hardware management, command scheduling, and
@@ -55,10 +52,10 @@ public class BaseTeleOp extends CommandOpMode {
     public ElapsedTime timer;
 
     /**
-     * Telemetry instance that sends data to both the driver station and FTC Dashboard.
-     * MultipleTelemetry allows simultaneous output to both destinations.
+     * Telemetry instance that sends data to the driver station.
+     * Panels web dashboard is updated separately by the Drive subsystem.
      */
-    TelemetryData telemetryData = new TelemetryData(new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry()));
+    TelemetryData telemetryData = new TelemetryData(telemetry);
 
     /**
      * Reference to the singleton robot instance.

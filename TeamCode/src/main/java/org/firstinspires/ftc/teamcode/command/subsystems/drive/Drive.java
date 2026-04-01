@@ -14,9 +14,11 @@ import com.pedropathing.geometry.Pose;
 import com.seattlesolvers.solverslib.kinematics.wpilibkinematics.ChassisSpeeds;
 import com.seattlesolvers.solverslib.hardware.motors.MotorEx;
 import com.seattlesolvers.solverslib.hardware.motors.CRServoEx;
-import com.acmerobotics.dashboard.FtcDashboard;
-import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
-import com.acmerobotics.dashboard.canvas.Canvas;
+import com.bylazar.telemetry.PanelsTelemetry;
+import com.bylazar.configurables.PanelsConfigurables;
+import com.bylazar.field.PanelsField;
+import com.bylazar.field.Canvas;
+import com.bylazar.configurables.annotations.Configurable;
 
 import static org.firstinspires.ftc.teamcode.Constants.*;
 
@@ -618,8 +620,13 @@ public class Drive extends SubsystemBase {
             localizerData = robot.getLocalizerData();
         }
 
-        // Dashboard Telemetry & Field Drawing (only if enabled in Constants)
+        // Dashboard Telemetry & Field Drawing (disabled - switching to Panels)
+        // TODO: Implement Panels visualization
+        // Currently using standard telemetry to driver station only
+        // Panels dashboard configuration will be added separately
+        /*
         if (robot.telemetry != null && org.firstinspires.ftc.teamcode.Constants.ENABLE_DASHBOARD_OVERLAY) {
+            // FTC Dashboard code removed - will be replaced with Panels
             TelemetryPacket packet = new TelemetryPacket();
             Canvas field = packet.fieldOverlay();
 
@@ -737,6 +744,7 @@ public class Drive extends SubsystemBase {
             // Send packet immediately to Dashboard HTML websocket
             FtcDashboard.getInstance().sendTelemetryPacket(packet);
         }
+        */
 
         // CSV Logging
         if (robot.logger != null) {

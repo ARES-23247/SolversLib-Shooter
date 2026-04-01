@@ -31,7 +31,8 @@
       "Bash(head:*)",
       "Bash(mv BackdropAligner.java vision/)",
       "Bash(mv GamePieceDetector.java vision/)",
-      "Bash(find . -name *.json -o -name *dashboard* -o -name *Dashboard*)"
+      "Bash(find . -name *.json -o -name *dashboard* -o -name *Dashboard*)",
+      "Bash(./gradlew :TeamCode:compileDebugJavaWithJavac --quiet)"
     ]
   }
 }
