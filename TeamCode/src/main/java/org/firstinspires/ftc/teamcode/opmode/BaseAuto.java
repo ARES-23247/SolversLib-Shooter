@@ -15,8 +15,8 @@ import com.seattlesolvers.solverslib.command.WaitCommand;
 import com.seattlesolvers.solverslib.pedroCommand.FollowPathCommand;
 import com.seattlesolvers.solverslib.util.TelemetryData;
 
-import org.firstinspires.ftc.teamcode.commandbase.subsystems.Drive;
-import org.firstinspires.ftc.teamcode.globals.Robot;
+import org.firstinspires.ftc.teamcode.command.subsystems.drive.Drive;
+import org.firstinspires.ftc.teamcode.Robot;
 
 /**
  * Autonomous OpMode for the ARES robot with vision localization.

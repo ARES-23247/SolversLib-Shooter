@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.util.vision;
 
 import com.qualcomm.hardware.limelightvision.LLResult;
+import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -123,7 +124,7 @@ public class LimelightCamera {
      */
     public void update(double maxDistance, int minTags, double healthTimeout,
                       int[] preferredTagIDs) {
-        com.qualcomm.hardware.limelightvision.LLResult result = limelight.getLatestResult();
+        LLResult result = limelight.getLatestResult();
 
         hasValidDetection = false;
         visibleTagCount = 0;
@@ -142,7 +143,7 @@ public class LimelightCamera {
                     double rawHeading = botpose.getOrientation().getYaw(AngleUnit.RADIANS);
 
                     // Detect unrealistic Z (floating robot)
-                    isPoseFloating = Math.abs(rawZ) > org.firstinspires.ftc.teamcode.globals.Constants.VISION_MAX_VALID_Z;
+                    isPoseFloating = Math.abs(rawZ) > org.firstinspires.ftc.teamcode.Constants.VISION_MAX_VALID_Z;
 
                     // Apply calibration (mount offset + orientation offset)
                     poseX = rawX + mountX;
@@ -159,7 +160,7 @@ public class LimelightCamera {
                     // Only consider valid if within max distance
                     if (detectionDistance <= maxDistance) {
                         // Check field boundaries if enabled
-                        if (org.firstinspires.ftc.teamcode.globals.Constants.ENABLE_VISION_BOUNDARY_CHECK) {
+                        if (org.firstinspires.ftc.teamcode.Constants.ENABLE_VISION_BOUNDARY_CHECK) {
                             if (!isWithinFieldBounds(poseX, poseY)) {
                                 // Reject reading outside field boundaries
                                 hasValidDetection = false;
@@ -213,7 +214,7 @@ public class LimelightCamera {
         Pose3D bestPose = null;
         double bestDistance = Double.MAX_VALUE;
 
-        for (com.qualcomm.hardware.limelightvision.LLResultTypes.FiducialResult fiducial : result.getFiducialResults()) {
+        for (LLResultTypes.FiducialResult fiducial : result.getFiducialResults()) {
             int tagID = fiducial.getFiducialId();
 
             // Check if this is a preferred tag
@@ -401,7 +402,7 @@ public class LimelightCamera {
      */
     public double getEffectivePositionNoise() {
         if (isPoseFloating) {
-            return positionNoise * org.firstinspires.ftc.teamcode.globals.Constants.VISION_FLOATING_NOISE_MULTIPLIER;
+            return positionNoise * org.firstinspires.ftc.teamcode.Constants.VISION_FLOATING_NOISE_MULTIPLIER;
         }
         return positionNoise;
     }
@@ -416,7 +417,7 @@ public class LimelightCamera {
      */
     public double getEffectiveHeadingNoise() {
         if (isPoseFloating) {
-            return headingNoise * org.firstinspires.ftc.teamcode.globals.Constants.VISION_FLOATING_NOISE_MULTIPLIER;
+            return headingNoise * org.firstinspires.ftc.teamcode.Constants.VISION_FLOATING_NOISE_MULTIPLIER;
         }
         return headingNoise;
     }
@@ -432,11 +433,11 @@ public class LimelightCamera {
      * @return true if within bounds, false if outside
      */
     private boolean isWithinFieldBounds(double x, double y) {
-        double margin = org.firstinspires.ftc.teamcode.globals.Constants.FIELD_BOUNDARY_MARGIN;
-        double xMin = org.firstinspires.ftc.teamcode.globals.Constants.FIELD_X_MIN - margin;
-        double xMax = org.firstinspires.ftc.teamcode.globals.Constants.FIELD_X_MAX + margin;
-        double yMin = org.firstinspires.ftc.teamcode.globals.Constants.FIELD_Y_MIN - margin;
-        double yMax = org.firstinspires.ftc.teamcode.globals.Constants.FIELD_Y_MAX + margin;
+        double margin = org.firstinspires.ftc.teamcode.Constants.FIELD_BOUNDARY_MARGIN;
+        double xMin = org.firstinspires.ftc.teamcode.Constants.FIELD_X_MIN - margin;
+        double xMax = org.firstinspires.ftc.teamcode.Constants.FIELD_X_MAX + margin;
+        double yMin = org.firstinspires.ftc.teamcode.Constants.FIELD_Y_MIN - margin;
+        double yMax = org.firstinspires.ftc.teamcode.Constants.FIELD_Y_MAX + margin;
 
         return x >= xMin && x <= xMax && y >= yMin && y <= yMax;
     }

@@ -1,14 +1,14 @@
 package org.firstinspires.ftc.teamcode.util.tuning;
 
-import org.firstinspires.ftc.teamcode.commandbase.subsystems.Drive;
-import org.firstinspires.ftc.teamcode.commandbase.subsystems.swerve.OctoSwerveModuleV2;
-import org.firstinspires.ftc.teamcode.globals.Robot;
+import org.firstinspires.ftc.teamcode.command.subsystems.drive.Drive;
+import org.firstinspires.ftc.teamcode.command.subsystems.drive.OctoSwerveModuleV2;
+import org.firstinspires.ftc.teamcode.Robot;
 
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import com.seattlesolvers.solverslib.util.TelemetryData;
 
-import static org.firstinspires.ftc.teamcode.globals.Constants.*;
+import static org.firstinspires.ftc.teamcode.Constants.*;
 
 /**
  * Automatic tuning utility for swerve drive steering (axial) control.

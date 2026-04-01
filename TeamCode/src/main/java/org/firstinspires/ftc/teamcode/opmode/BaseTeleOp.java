@@ -8,8 +8,8 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import com.seattlesolvers.solverslib.command.CommandOpMode;
 import com.seattlesolvers.solverslib.util.TelemetryData;
 
-import org.firstinspires.ftc.teamcode.commandbase.commands.TeleOpDrive;
-import org.firstinspires.ftc.teamcode.globals.Robot;
+import org.firstinspires.ftc.teamcode.command.commands.TeleOpDrive;
+import org.firstinspires.ftc.teamcode.Robot;
 
 /**
  * TeleOp (driver-controlled) OpMode for the ARES robot.
@@ -42,8 +42,8 @@ import org.firstinspires.ftc.teamcode.globals.Robot;
  * on those responsibilities.</p>
  *
  * @see com.seattlesolvers.solverslib.command.CommandOpMode
- * @see org.firstinspires.ftc.teamcode.commandbase.commands.TeleOpDrive
- * @see org.firstinspires.ftc.teamcode.globals.Robot
+ * @see org.firstinspires.ftc.teamcode.command.commands.TeleOpDrive
+ * @see org.firstinspires.ftc.teamcode.Robot
  */
 @TeleOp(name = "Base TeleOp", group = "TeleOp")
 public class BaseTeleOp extends CommandOpMode {
@@ -150,9 +150,9 @@ public class BaseTeleOp extends CommandOpMode {
         timer.reset();
 
         // Output TeleOpDrive telemetry (throttle, buttons, heading resets)
-        if (robot.drive.getDefaultCommand() instanceof org.firstinspires.ftc.teamcode.commandbase.commands.TeleOpDrive) {
-            org.firstinspires.ftc.teamcode.commandbase.commands.TeleOpDrive driveCommand =
-                (org.firstinspires.ftc.teamcode.commandbase.commands.TeleOpDrive) robot.drive.getDefaultCommand();
+        if (robot.drive.getDefaultCommand() instanceof org.firstinspires.ftc.teamcode.command.commands.TeleOpDrive) {
+            org.firstinspires.ftc.teamcode.command.commands.TeleOpDrive driveCommand =
+                (org.firstinspires.ftc.teamcode.command.commands.TeleOpDrive) robot.drive.getDefaultCommand();
             driveCommand.outputTelemetry(telemetryData);
         }
 

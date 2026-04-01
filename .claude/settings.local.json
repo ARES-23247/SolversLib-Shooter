@@ -5,7 +5,32 @@
       "WebSearch",
       "Bash(curl -s \"https://api.github.com/repos/Simple-Robotics-System/SRSHub-Firmware/contents/src\")",
       "Bash(curl -s \"https://api.github.com/repos/Simple-Robotics-System/SRSHub-Firmware/contents/src/java\")",
-      "Bash(curl -s \"https://raw.githubusercontent.com/Simple-Robotics-System/SRSHub-Firmware/main/src/java/SRSHub.java\")"
+      "Bash(curl -s \"https://raw.githubusercontent.com/Simple-Robotics-System/SRSHub-Firmware/main/src/java/SRSHub.java\")",
+      "Bash(./gradlew :TeamCode:compileDebugJavaWithJavac --warning-mode none)",
+      "Skill(robot-dev:doctor)",
+      "Bash(./gradlew --version)",
+      "Bash(xargs ls:*)",
+      "Bash(cd:*)",
+      "Bash(mv pedroPathing/Constants.java util/pathing/PedroPathingConstants.java)",
+      "Bash(mv pedroPathing/Tuning.java util/pathing/PedroPathingTuning.java)",
+      "Bash(mv globals/Constants.java .)",
+      "Bash(rmdir globals:*)",
+      "Bash(mv auto/AutoTuneOpMode.java opmode/autonomous/)",
+      "Bash(mv auto/AutoTuneFeedforward.java opmode/autonomous/)",
+      "Bash(mv auto/AutoTuneSteering.java opmode/autonomous/)",
+      "Bash(mv subsystems/Drive.java subsystems/drive/)",
+      "Bash(mv subsystems/SwerveTuner.java subsystems/drive/)",
+      "Bash(mv subsystems/Vision.java subsystems/vision/)",
+      "Bash(mv subsystems/ObjectDetection.java subsystems/vision/)",
+      "Bash(mv swerve/OctoSwerveDrivetrainV2.java drive/)",
+      "Bash(mv swerve/OctoSwerveModuleV2.java drive/)",
+      "Bash(mv swerve/encoders/* encoders/)",
+      "Bash(sed -i 's/package org\\\\.firstinspires\\\\.ftc\\\\.teamcode\\\\.command\\\\.subsystems/package org.firstinspires.ftc.teamcode.command.subsystems.drive/g' drive/*.java)",
+      "Bash(sed -i 's/package org\\\\.firstinspires\\\\.ftc\\\\.teamcode\\\\.command\\\\.subsystems/package org.firstinspires.ftc.teamcode.command.subsystems.encoders/g' encoders/*.java)",
+      "Bash(sed -i 's/package org\\\\.firstinspires\\\\.ftc\\\\.teamcode\\\\.command\\\\.subsystems/package org.firstinspires.ftc.teamcode.command.subsystems.vision/g' vision/*.java)",
+      "Bash(head:*)",
+      "Bash(mv BackdropAligner.java vision/)",
+      "Bash(mv GamePieceDetector.java vision/)"
     ]
   }
 }
