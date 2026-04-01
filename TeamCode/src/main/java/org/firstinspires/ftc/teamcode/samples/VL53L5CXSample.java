@@ -117,7 +117,7 @@ public class VL53L5CXSample extends LinearOpMode {
                     telemetry.addData("FPS", String.format("%.1f", fps));
 
                     // Visual zone representation (8×8 max)
-                    if (frame.resolution == VL53L5CX.Resolution.RESOLUTION_4X4) {
+                    if (frame.resolution == VL53L5CX.Resolution.RES_4X4) {
                         printZones4x4(frame);
                     } else {
                         printZones8x8(frame);
@@ -149,14 +149,14 @@ public class VL53L5CXSample extends LinearOpMode {
     private void toggleResolution() {
         try {
             VL53L5CX.Resolution current = sensor.getResolution();
-            VL53L5CX.Resolution newRes = (current == VL53L5CX.Resolution.RESOLUTION_4X4)
-                    ? VL53L5CX.Resolution.RESOLUTION_8X8
-                    : VL53L5CX.Resolution.RESOLUTION_4X4;
+            VL53L5CX.Resolution newRes = (current == VL53L5CX.Resolution.RES_4X4)
+                    ? VL53L5CX.Resolution.RES_8X8
+                    : VL53L5CX.Resolution.RES_4X4;
 
             sensor.setResolution(newRes);
-            telemetry.log().add("Resolution: " + newRes);
+            System.out.println("Resolution: " + newRes);
         } catch (Exception e) {
-            telemetry.log().add("Failed to change resolution: " + e.getMessage());
+            System.out.println("Failed to change resolution: " + e.getMessage());
         }
     }
 
@@ -172,9 +172,9 @@ public class VL53L5CXSample extends LinearOpMode {
             VL53L5CX.Frequency next = freqs[nextIndex];
 
             sensor.setFrequency(next);
-            telemetry.log().add("Frequency: " + next.hz + "Hz");
+            System.out.println("Frequency: " + next.hz + "Hz");
         } catch (Exception e) {
-            telemetry.log().add("Failed to change frequency: " + e.getMessage());
+            System.out.println("Failed to change frequency: " + e.getMessage());
         }
     }
 
@@ -186,8 +186,8 @@ public class VL53L5CXSample extends LinearOpMode {
             VL53L5CX.DistanceFrame frame = sensor.readDistanceFrame(100);
             if (frame == null) return;
 
-            telemetry.log().add("=== VL53L5CX Zone Data ===");
-            telemetry.log().add("Resolution: " + frame.resolution.width + "×" + frame.resolution.width);
+            System.out.println("=== VL53L5CX Zone Data ===");
+            System.out.println("Resolution: " + frame.resolution.width + "×" + frame.resolution.width);
 
             for (int row = 0; row < frame.resolution.width; row++) {
                 StringBuilder sb = new StringBuilder();
@@ -200,11 +200,11 @@ public class VL53L5CXSample extends LinearOpMode {
                         sb.append(" ---- ");
                     }
                 }
-                telemetry.log().add(sb.toString());
+                System.out.println(sb.toString());
             }
-            telemetry.log().add("========================");
+            System.out.println("========================");
         } catch (Exception e) {
-            telemetry.log().add("Failed to read: " + e.getMessage());
+            System.out.println("Failed to read: " + e.getMessage());
         }
     }
 

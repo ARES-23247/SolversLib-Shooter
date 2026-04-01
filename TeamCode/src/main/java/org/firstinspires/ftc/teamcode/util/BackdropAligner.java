@@ -70,7 +70,7 @@ public class BackdropAligner {
         // Use 8×8 resolution for detailed alignment data
         this.sensor = new VL53L5CX(srsHub);
         try {
-            sensor.setResolution(VL53L5CX.Resolution.RESOLUTION_8X8);
+            sensor.setResolution(VL53L5CX.Resolution.RES_8X8);
         } catch (Exception e) {
             System.err.println("Failed to set resolution: " + e.getMessage());
         }

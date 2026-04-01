@@ -7,7 +7,7 @@ import org.firstinspires.ftc.teamcode.globals.Robot;
 import org.firstinspires.ftc.teamcode.util.DataLogger;
 import org.firstinspires.ftc.teamcode.commandbase.subsystems.swerve.OctoSwerveDrivetrainV2;
 
-import dev.nullftc.groot.Logger;
+
 
 /**
  * Automatic tuning routines for swerve drive feedforward and PID constants.
@@ -267,7 +267,7 @@ public class SwerveTuner extends SubsystemBase {
         int n = testPowerLevels.length;
 
         for (int i = 0; i < n; i++) {
-            double velocityFraction = avgVelocities[i] / MAX_DRIVE_VELOCITY;
+            double velocityFraction = avgVelocities[i] / org.firstinspires.ftc.teamcode.globals.Constants.MAX_DRIVE_VELOCITY;
             sumX += velocityFraction;
             sumY += testPowerLevels[i];
             sumXY += velocityFraction * testPowerLevels[i];
@@ -372,9 +372,9 @@ public class SwerveTuner extends SubsystemBase {
 
     private void log(String message) {
         if (robot.telemetry != null) {
-            robot.telemetry.log().add("[SwerveTuner] " + message);
+            System.out.println("[SwerveTuner] " + message);
         }
-        Logger.important("[SwerveTuner] " + message);
+        System.out.println("[SwerveTuner] " + message);
     }
 
     private void sleep(long millis) {

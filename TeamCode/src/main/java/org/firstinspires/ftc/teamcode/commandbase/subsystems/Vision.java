@@ -7,7 +7,7 @@ import org.firstinspires.ftc.teamcode.util.vision.LimelightCamera;
 import org.firstinspires.ftc.teamcode.commandbase.subsystems.Drive;
 import org.firstinspires.ftc.teamcode.globals.Constants.VisionFusionMode;
 
-import com.pedropathing.localization.Pose;
+import com.pedropathing.geometry.Pose;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -410,7 +410,7 @@ public class Vision extends SubsystemBase {
         // Warn if outliers detected
         if (consensusCameras.size() < healthyCameras.size() &&
             robot.telemetry != null) {
-            robot.telemetry.log().add(String.format(
+            System.out.println(String.format(
                 "Vision: Rejected %d outlier cameras",
                 healthyCameras.size() - consensusCameras.size()
             ));
@@ -465,8 +465,7 @@ public class Vision extends SubsystemBase {
                 robot.telemetry.addData("Vision " + camera.getName() + " Floating", "YES");
             }
             if (camera.getBoundaryRejectionCount() > 0) {
-                robot.telemetry.addData("Vision " + camera.getName() + " Boundary Rejects",
-                    "%d", camera.getBoundaryRejectionCount());
+                robot.telemetry.addData("Vision " + camera.getName() + " Boundary Rejects", String.valueOf(camera.getBoundaryRejectionCount()));
             }
         }
 

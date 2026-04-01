@@ -1,6 +1,6 @@
 package org.firstinspires.ftc.teamcode.globals;
 
-import com.outoftheboxrobotics.photoncore.PhotonCore;
+
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.robotcore.hardware.HardwareMap;
@@ -24,9 +24,9 @@ import org.firstinspires.ftc.teamcode.commandbase.subsystems.Vision;
 import java.io.File;
 import java.io.IOException;
 
-import dev.nullftc.profiler.Profiler;
-import dev.nullftc.profiler.entry.BasicProfilerEntryFactory;
-import dev.nullftc.profiler.exporter.CSVProfilerExporter;
+
+
+
 
 /**
  * Main robot singleton class that manages all hardware, subsystems, and the robot's update loop.
@@ -37,7 +37,6 @@ import dev.nullftc.profiler.exporter.CSVProfilerExporter;
  *
  * <ul>
  *   <li>Initializing all hardware components (motors, servos, sensors)</li>
- *   <li>Configuring performance optimizations (PhotonCore bulk caching)</li>
  *   <li>Creating and managing subsystem instances</li>
  *   <li>Running the main update loop that executes the command scheduler</li>
  *   <li>Managing telemetry, logging, and profiling</li>
@@ -45,13 +44,11 @@ import dev.nullftc.profiler.exporter.CSVProfilerExporter;
  *
  * <h3>Performance Optimizations:</h3>
  * <ul>
- *   <li><b>PhotonCore Bulk Caching:</b> Manual mode with 8 parallel commands for reduced I2C latency</li>
  *   <li><b>Parallel Servo Updates:</b> All servos update simultaneously for ~3-6ms faster loop times</li>
  *   <li><b>REV Hub IMU Disabled:</b> Reduces I2C bus traffic - using GoBilda Pinpoint IMU instead</li>
  *   <li><b>Voltage Sensor Caching:</b> Updates every 250ms to reduce polling overhead</li>
  * </ul>
  *
- * <p><b>PhotonCore Integration:</b> This robot uses PhotonCore's manual bulk caching mode
  * to optimize hardware read performance. All hardware reads are cached and must be cleared
  * at the end of each update loop using {@link #updateLoop(TelemetryData)}.</p>
  *
@@ -60,7 +57,6 @@ import dev.nullftc.profiler.exporter.CSVProfilerExporter;
  * {@link #updateLoop(TelemetryData)} every iteration of the OpMode's loop.</p>
  *
  * @see com.seattlesolvers.solverslib.command.Robot
- * @see <a href="https://gitlab.com/OutoftheBoxRobotics/PhotonCore">PhotonCore Documentation</a>
  */
 public class Robot extends com.seattlesolvers.solverslib.command.Robot {
 
@@ -91,7 +87,6 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
      * Performance profiler for measuring code execution times.
      * Outputs CSV logs to the /FIRST/logs/ directory for analysis.
      */
-    public Profiler profiler;
 
     /**
      * File reference for the profiler output CSV.
@@ -238,7 +233,7 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
      * </ul>
      * </p>
      */
-    public org.firstinspires.ftc.teamcode.util.LimelightCamera[] limelightCameras;
+    public org.firstinspires.ftc.teamcode.util.vision.LimelightCamera[] limelightCameras;
 
     /**
      * SRS Hub for analog sensor monitoring.
@@ -315,7 +310,6 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
      *
      * <ol>
      *   <li>Creates profiler and logging infrastructure</li>
-     *   <li>Configures PhotonCore for bulk caching optimization</li>
      *   <li>Initializes voltage sensor with 250ms caching</li>
      *   <li>Initializes swerve drive motors with caching tolerance</li>
      *   <li>Initializes swerve steering servos</li>
@@ -331,7 +325,6 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
      * which reduces I2C bus traffic and improves loop times. The Pinpoint IMU provides reliable
      * heading data on its own I2C bus.</p>
      *
-     * <p><b>PhotonCore Configuration:</b> Manual bulk caching is enabled on both hubs
      * with a maximum of 8 parallel commands. Parallel servo updates are enabled for
      * optimal performance (~3-6ms faster loop times).</p>
      *
@@ -351,23 +344,16 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
 
         long timestamp = System.currentTimeMillis();
         file = new File(logsFolder, "profiler-" + timestamp + ".csv");
-        profiler = Profiler.builder()
-                .factory(new BasicProfilerEntryFactory())
-                .exporter(new CSVProfilerExporter(file))
-                .debugLog(false)
-                .build();
 
         // ---------------------------------------------
         // Photon Configuration: Optimized for Performance
         // ---------------------------------------------
-        PhotonCore.CONTROL_HUB.setBulkCachingMode(LynxModule.BulkCachingMode.MANUAL);
-        PhotonCore.EXPANSION_HUB.setBulkCachingMode(LynxModule.BulkCachingMode.MANUAL);
-        PhotonCore.experimental.setMaximumParallelCommands(org.firstinspires.ftc.teamcode.globals.Constants.PHOTON_PARALLEL_COMMANDS);
+
+
+
 
         // Enable parallel servo updates for faster loop times (~3-6ms improvement)
         // All servos are on USB-connected hubs, so this is safe to enable
-        PhotonCore.PARALLELIZE_SERVOS = org.firstinspires.ftc.teamcode.globals.Constants.PARALLELIZE_SERVOS;
-        PhotonCore.enable();
 
         voltageSensor = hwMap.voltageSensor.iterator().next();
 
@@ -404,7 +390,7 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
         double[] positionNoise = org.firstinspires.ftc.teamcode.globals.Constants.LIMELIGHT_POSITION_NOISE;
         double[] headingNoise = org.firstinspires.ftc.teamcode.globals.Constants.LIMELIGHT_HEADING_NOISE;
 
-        limelightCameras = new org.firstinspires.ftc.teamcode.util.LimelightCamera[cameraNames.length];
+        limelightCameras = new org.firstinspires.ftc.teamcode.util.vision.LimelightCamera[cameraNames.length];
 
         for (int i = 0; i < cameraNames.length; i++) {
             Limelight3A ll = hwMap.get(Limelight3A.class, cameraNames[i]);
@@ -413,7 +399,7 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
             ll.start();
 
             // Create camera with full calibration
-            limelightCameras[i] = new org.firstinspires.ftc.teamcode.util.LimelightCamera(
+            limelightCameras[i] = new org.firstinspires.ftc.teamcode.util.vision.LimelightCamera(
                 ll,
                 cameraNames[i],
                 cameraPriorities[i],
@@ -747,7 +733,6 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
      *   <li>Updates telemetry output (throttled to every N loops for performance)</li>
      *   <li>Flushes CSV logger data (throttled to every N loops)</li>
      *   <li>Logs loop time metrics</li>
-     *   <li>Clears PhotonCore bulk caches on both hubs</li>
      * </ol>
      *
      * <h3>Performance Optimizations:</h3>
@@ -761,10 +746,8 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
      * </ul>
      *
      * <p><b>Critical:</b> The bulk cache clear at the end of this method is essential for
-     * PhotonCore's manual caching mode. Without it, hardware reads will return stale data.</p>
      *
      * @param telemetryData the telemetry instance for sending data to driver station
-     * @see PhotonCore#clearBulkCache()
      * @see com.seattlesolvers.solverslib.command.CommandScheduler#run()
      */
     public void updateLoop(TelemetryData telemetryData) {
@@ -806,8 +789,8 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
         loopCounter++;
 
         // Always clear caches at the end of the run loop!
-        PhotonCore.CONTROL_HUB.clearBulkCache();
-        PhotonCore.EXPANSION_HUB.clearBulkCache();
+
+
     }
 
     /**

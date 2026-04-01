@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.auto;
 
+import com.seattlesolvers.solverslib.command.CommandBase;
 import com.seattlesolvers.solverslib.command.Command;
 import com.seattlesolvers.solverslib.command.InstantCommand;
 import com.seattlesolvers.solverslib.command.SequentialCommandGroup;
@@ -8,7 +9,7 @@ import com.seattlesolvers.solverslib.command.WaitUntilCommand;
 
 import org.firstinspires.ftc.teamcode.commandbase.subsystems.Drive;
 import org.firstinspires.ftc.teamcode.globals.Robot;
-import org.firstinspires.ftc.robotcore.external.Telemetry;
+import com.seattlesolvers.solverslib.util.TelemetryData;
 
 /**
  * Automatic feedforward tuning routine for swerve drive.
@@ -56,7 +57,7 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 public class AutoTuneFeedforward extends SequentialCommandGroup {
 
     private final Drive drive;
-    private final Telemetry telemetry;
+    private final TelemetryData telemetry;
 
     // Test parameters
     private static final double KS_MAX_POWER = 0.30;  // Max power to test for kS
@@ -65,7 +66,7 @@ public class AutoTuneFeedforward extends SequentialCommandGroup {
 
     private static final double[] KV_TEST_POWERS = {0.2, 0.4, 0.6, 0.8};  // Power levels to test
     private static final int KV_SAMPLES_PER_LEVEL = 10;  // Samples per power level
-    private static final double KV_STEADY_STATE_SAMPLES = 5;  // Samples to wait for steady state
+    private static final int KV_STEADY_STATE_SAMPLES = 5;  // Samples to wait for steady state
 
     // Results storage
     private double foundKS = 0.0;
@@ -81,17 +82,17 @@ public class AutoTuneFeedforward extends SequentialCommandGroup {
         this.telemetry = Robot.getInstance().telemetry;
 
         addCommands(
-            new InstantCommand(() -> telemetry.log().add("=== FEEDFORWARD TUNING STARTED ===")),
-            new InstantCommand(() -> telemetry.log().add("ROBOT MUST BE ON BLOCKS!")),
-            new InstantCommand(() -> telemetry.log().add("Clear area around robot!")),
-            new WaitCommand(1.0),  // Safety pause
+            new InstantCommand(() -> System.out.println("=== FEEDFORWARD TUNING STARTED ===")),
+            new InstantCommand(() -> System.out.println("ROBOT MUST BE ON BLOCKS!")),
+            new InstantCommand(() -> System.out.println("Clear area around robot!")),
+            new WaitCommand(1000),  // Safety pause
 
             // Step 1: Tune kS (Static Friction)
             new TuneKSCommand(),
 
             // Pause between tests
             new InstantCommand(() -> drive.swerve.stop()),
-            new WaitCommand(1.0),
+            new WaitCommand(1000),
 
             // Step 2: Tune kV (Velocity Constant)
             new TuneKVCommand(),
@@ -106,7 +107,7 @@ public class AutoTuneFeedforward extends SequentialCommandGroup {
      * Tunes kS (static friction constant).
      * <p>Ramps power from 0 to 30% until wheels just start spinning.</p>
      */
-    private class TuneKSCommand extends Command {
+    private class TuneKSCommand extends CommandBase {
 
         private double currentPower = 0.0;
         private boolean found = false;
@@ -119,15 +120,15 @@ public class AutoTuneFeedforward extends SequentialCommandGroup {
         public void initialize() {
             currentPower = 0.0;
             found = false;
-            telemetry.log().add("Tuning kS (Static Friction)...");
-            telemetry.log().add("Ramping power until wheels spin...");
+            System.out.println("Tuning kS (Static Friction)...");
+            System.out.println("Ramping power until wheels spin...");
         }
 
         @Override
         public void execute() {
             if (found) return;
 
-            drive.swerve.drive(new ChassisSpeeds(currentPower, 0, 0));
+            drive.swerve.drive(new com.seattlesolvers.solverslib.kinematics.wpilibkinematics.ChassisSpeeds(currentPower, 0, 0));
 
             // Check if wheels are spinning
             double avgVelocity = getAverageDriveVelocity();
@@ -135,14 +136,14 @@ public class AutoTuneFeedforward extends SequentialCommandGroup {
             if (avgVelocity > KS_VELOCITY_THRESHOLD) {
                 foundKS = currentPower;
                 found = true;
-                telemetry.log().add(String.format("kS FOUND: %.3f", foundKS));
-                telemetry.log().add(String.format("  (Wheels started spinning at %.3f power)", foundKS));
+                System.out.println(String.format("kS FOUND: %.3f", foundKS));
+                System.out.println(String.format("  (Wheels started spinning at %.3f power)", foundKS));
             } else {
                 currentPower += KS_POWER_INCREMENT;
                 if (currentPower > KS_MAX_POWER) {
                     foundKS = 0.15;  // Default value
                     found = true;
-                    telemetry.log().add("kS TUNE TIMEOUT - Using default: 0.15");
+                    System.out.println("kS TUNE TIMEOUT - Using default: 0.15");
                 }
             }
 
@@ -165,7 +166,7 @@ public class AutoTuneFeedforward extends SequentialCommandGroup {
      * Tunes kV (velocity constant).
      * <p>Runs motors at multiple power levels, performs linear regression.</p>
      */
-    private class TuneKVCommand extends Command {
+    private class TuneKVCommand extends CommandBase {
 
         private int currentLevel = 0;
         private int currentSample = 0;
@@ -177,8 +178,8 @@ public class AutoTuneFeedforward extends SequentialCommandGroup {
 
         @Override
         public void initialize() {
-            telemetry.log().add("Tuning kV (Velocity Constant)...");
-            telemetry.log().add("Testing power levels: 20%, 40%, 60%, 80%");
+            System.out.println("Tuning kV (Velocity Constant)...");
+            System.out.println("Testing power levels: 20%, 40%, 60%, 80%");
 
             // Initialize data array
             for (int i = 0; i < velocityData.length; i++) {
@@ -193,12 +194,12 @@ public class AutoTuneFeedforward extends SequentialCommandGroup {
             if (currentLevel >= KV_TEST_POWERS.length) {
                 // All levels complete, calculate kV
                 foundKV = calculateKV();
-                telemetry.log().add(String.format("kV FOUND: %.3f", foundKV));
+                System.out.println(String.format("kV FOUND: %.3f", foundKV));
                 return;
             }
 
             double testPower = KV_TEST_POWERS[currentLevel];
-            drive.swerve.drive(new ChassisSpeeds(testPower, 0, 0));
+            drive.swerve.drive(new com.seattlesolvers.solverslib.kinematics.wpilibkinematics.ChassisSpeeds(testPower, 0, 0));
 
             // Wait for steady state
             if (currentSample >= KV_STEADY_STATE_SAMPLES) {
@@ -212,7 +213,7 @@ public class AutoTuneFeedforward extends SequentialCommandGroup {
                     // Move to next power level
                     currentLevel++;
                     currentSample = 0;
-                    telemetry.log().add(String.format("Level %d complete: %.2f in/s at %.0f%% power",
+                    System.out.println(String.format("Level %d complete: %.2f in/s at %.0f%% power",
                         currentLevel, avgVelocity, testPower * 100));
                 }
             } else {
@@ -258,7 +259,7 @@ public class AutoTuneFeedforward extends SequentialCommandGroup {
             int n = KV_TEST_POWERS.length;
 
             for (int i = 0; i < n; i++) {
-                double velocityFraction = avgVelocities[i] / MAX_DRIVE_VELOCITY;
+                double velocityFraction = avgVelocities[i] / org.firstinspires.ftc.teamcode.globals.Constants.MAX_DRIVE_VELOCITY;
                 sumX += velocityFraction;
                 sumY += KV_TEST_POWERS[i];
                 sumXY += velocityFraction * KV_TEST_POWERS[i];
@@ -269,13 +270,13 @@ public class AutoTuneFeedforward extends SequentialCommandGroup {
             double intercept = (sumY - slope * sumX) / n;
 
             // kV is the slope (kS is the intercept)
-            telemetry.log().add("kV Regression Data:");
+            System.out.println("kV Regression Data:");
             for (int i = 0; i < n; i++) {
-                telemetry.log().add(String.format("  Power: %.1f%% → Velocity: %.1f in/s",
+                System.out.println(String.format("  Power: %.1f%% → Velocity: %.1f in/s",
                     KV_TEST_POWERS[i] * 100, avgVelocities[i]));
             }
-            telemetry.log().add(String.format("  Slope (kV): %.3f", slope));
-            telemetry.log().add(String.format("  Intercept (kS): %.3f", intercept));
+            System.out.println(String.format("  Slope (kV): %.3f", slope));
+            System.out.println(String.format("  Intercept (kS): %.3f", intercept));
 
             return slope;
         }
@@ -294,16 +295,16 @@ public class AutoTuneFeedforward extends SequentialCommandGroup {
      * Reports tuning results to telemetry.
      */
     private void reportResults() {
-        telemetry.log().add("=== FEEDFORWARD TUNING COMPLETE ===");
-        telemetry.log().add(String.format("RESULTS:"));
-        telemetry.log().add(String.format("kS (Static Friction): %.3f", foundKS));
-        telemetry.log().add(String.format("kV (Velocity): %.3f", foundKV));
-        telemetry.log().add("");
-        telemetry.log().add("UPDATE Constants.java WITH:");
-        telemetry.log().add(String.format("DRIVE_KS = %.3f;", foundKS));
-        telemetry.log().add(String.format("DRIVE_KV = %.3f;", foundKV));
-        telemetry.log().add("");
-        telemetry.log().add("Then restart robot to apply new constants!");
-        telemetry.log().add("===================================");
+        System.out.println("=== FEEDFORWARD TUNING COMPLETE ===");
+        System.out.println(String.format("RESULTS:"));
+        System.out.println(String.format("kS (Static Friction): %.3f", foundKS));
+        System.out.println(String.format("kV (Velocity): %.3f", foundKV));
+        System.out.println("");
+        System.out.println("UPDATE Constants.java WITH:");
+        System.out.println(String.format("DRIVE_KS = %.3f;", foundKS));
+        System.out.println(String.format("DRIVE_KV = %.3f;", foundKV));
+        System.out.println("");
+        System.out.println("Then restart robot to apply new constants!");
+        System.out.println("===================================");
     }
 }

@@ -103,7 +103,7 @@ import java.util.Locale;
 @I2cDeviceType
 @DeviceProperties(xmlTag = "OctoQuadFWv3", name = "OctoQuadFWv3")
 @SuppressWarnings("unused")
-public class OctoQuadFWv3 extends I2cDeviceSynchDevice<OctoQuadFWv3> {
+public class OctoQuadFWv3 extends I2cDeviceSynchDevice<com.qualcomm.robotcore.hardware.I2cDeviceSynchSimple> {
     public static final byte OCTOQUAD_CHIP_ID = 0x51;
     public static final int ENCODER_FIRST = 0;
     public static final int ENCODER_LAST = 7;

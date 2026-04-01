@@ -5,9 +5,9 @@ import org.firstinspires.ftc.teamcode.globals.Robot;
 
 import com.seattlesolvers.solverslib.kinematics.wpilibkinematics.ChassisSpeeds;
 import com.qualcomm.robotcore.util.ElapsedTime;
-import com.pedropathing.localization.Pose;
+import com.pedropathing.geometry.Pose;
 
-import org.firstinspires.ftc.robotcore.external.Telemetry;
+import com.seattlesolvers.solverslib.util.TelemetryData;
 
 import static org.firstinspires.ftc.teamcode.globals.Constants.*;
 
@@ -51,7 +51,7 @@ import static org.firstinspires.ftc.teamcode.globals.Constants.*;
 public class FeedforwardTuner {
 
     private final Drive drive;
-    private final Telemetry telemetry;
+    private final TelemetryData telemetry;
     private final ElapsedTime timer;
 
     // Tuning parameters
@@ -139,31 +139,31 @@ public class FeedforwardTuner {
         timer.reset();
         totalTuningTime = 0.0;
 
-        telemetry.log().add("===========================================");
-        telemetry.log().add("   FEEDFORWARD AUTOTUNER STARTING");
-        telemetry.log().add("===========================================");
-        telemetry.log().add("");
-        telemetry.log().add("SAFETY SYSTEMS ACTIVE:");
-        telemetry.log().add("  ✓ Distance limit: 10 feet maximum");
-        telemetry.log().add("  ✓ Time limit: 60 seconds maximum");
-        telemetry.log().add("  ✓ Stuck detection: Auto-stop if not moving");
-        telemetry.log().add("  ✓ Emergency stop: Driver can STOP anytime");
-        telemetry.log().add("");
-        telemetry.log().add("ROBOT SETUP:");
-        telemetry.log().add("  ✓ Robot on field floor (carpet/tiles)");
-        telemetry.log().add("  ✓ Clear area: 4x4 feet minimum");
-        telemetry.log().add("  ✓ Robot will drive forward");
-        telemetry.log().add("");
-        telemetry.log().add("Starting in 5 seconds...");
+        System.out.println("===========================================");
+        System.out.println("   FEEDFORWARD AUTOTUNER STARTING");
+        System.out.println("===========================================");
+        System.out.println("");
+        System.out.println("SAFETY SYSTEMS ACTIVE:");
+        System.out.println("  ✓ Distance limit: 10 feet maximum");
+        System.out.println("  ✓ Time limit: 60 seconds maximum");
+        System.out.println("  ✓ Stuck detection: Auto-stop if not moving");
+        System.out.println("  ✓ Emergency stop: Driver can STOP anytime");
+        System.out.println("");
+        System.out.println("ROBOT SETUP:");
+        System.out.println("  ✓ Robot on field floor (carpet/tiles)");
+        System.out.println("  ✓ Clear area: 4x4 feet minimum");
+        System.out.println("  ✓ Robot will drive forward");
+        System.out.println("");
+        System.out.println("Starting in 5 seconds...");
 
         // Safety countdown
         for (int i = 5; i > 0; i--) {
-            telemetry.log().add(String.format("  %d...", i));
+            System.out.println(String.format("  %d...", i));
             sleep(1000);
 
             // Check for early stop
             if (isStopRequested() || totalTuningTime > MAX_TOTAL_TUNING_TIME) {
-                telemetry.log().add("  EMERGENCY STOP - Tuning cancelled!");
+                System.out.println("  EMERGENCY STOP - Tuning cancelled!");
                 drive.swerve.stop();
                 return new double[]{0.0, 0.0};
             }
@@ -173,47 +173,47 @@ public class FeedforwardTuner {
         initializePositionTracking();
 
         // Tune kS
-        telemetry.log().add("");
-        telemetry.log().add("STEP 1: TUNING kS (Static Friction)");
-        telemetry.log().add("----------------------------------------");
+        System.out.println("");
+        System.out.println("STEP 1: TUNING kS (Static Friction)");
+        System.out.println("----------------------------------------");
         foundKS = tuneKS();
 
         if (isStopRequested() || totalTuningTime > MAX_TOTAL_TUNING_TIME) {
-            telemetry.log().add("  EMERGENCY STOP - Tuning cancelled!");
+            System.out.println("  EMERGENCY STOP - Tuning cancelled!");
             drive.swerve.stop();
             return new double[]{foundKS, 0.0};
         }
 
         // Brief pause
         drive.swerve.stop();
-        telemetry.log().add("  Pausing for 1 second...");
+        System.out.println("  Pausing for 1 second...");
         sleep(1000);
 
         // Reset position for kV tuning
         resetPositionTracking();
 
         // Tune kV
-        telemetry.log().add("");
-        telemetry.log().add("STEP 2: TUNING kV (Velocity Constant)");
-        telemetry.log().add("----------------------------------------");
+        System.out.println("");
+        System.out.println("STEP 2: TUNING kV (Velocity Constant)");
+        System.out.println("----------------------------------------");
         foundKV = tuneKV();
 
         // Stop and report
         drive.swerve.stop();
 
-        telemetry.log().add("");
-        telemetry.log().add("===========================================");
-        telemetry.log().add("   TUNING COMPLETE!");
-        telemetry.log().add("===========================================");
-        telemetry.log().add("");
-        telemetry.log().add(String.format("kS (Static Friction): %.4f", foundKS));
-        telemetry.log().add(String.format("kV (Velocity):        %.4f", foundKV));
-        telemetry.log().add("");
-        telemetry.log().add("UPDATE Constants.java:");
-        telemetry.log().add(String.format("  DRIVE_KS = %.4f;", foundKS));
-        telemetry.log().add(String.format("  DRIVE_KV = %.4f;", foundKV));
-        telemetry.log().add("");
-        telemetry.log().add("Then restart robot to apply!");
+        System.out.println("");
+        System.out.println("===========================================");
+        System.out.println("   TUNING COMPLETE!");
+        System.out.println("===========================================");
+        System.out.println("");
+        System.out.println(String.format("kS (Static Friction): %.4f", foundKS));
+        System.out.println(String.format("kV (Velocity):        %.4f", foundKV));
+        System.out.println("");
+        System.out.println("UPDATE Constants.java:");
+        System.out.println(String.format("  DRIVE_KS = %.4f;", foundKS));
+        System.out.println(String.format("  DRIVE_KV = %.4f;", foundKV));
+        System.out.println("");
+        System.out.println("Then restart robot to apply!");
 
         return new double[]{foundKS, foundKV};
     }
@@ -226,7 +226,7 @@ public class FeedforwardTuner {
      * @return the measured kS value
      */
     private double tuneKS() {
-        telemetry.log().add("  Ramping power until robot moves...");
+        System.out.println("  Ramping power until robot moves...");
 
         double power = 0.0;
         double lastVelocity = 0.0;
@@ -235,8 +235,8 @@ public class FeedforwardTuner {
         while (power <= KS_MAX_POWER) {
             // Safety checks
             if (isStopRequested()) {
-                telemetry.log().add("");
-                telemetry.log().add("  EMERGENCY STOP - Tuning cancelled!");
+                System.out.println("");
+                System.out.println("  EMERGENCY STOP - Tuning cancelled!");
                 drive.swerve.stop();
                 return 0.15;  // Default value
             }
@@ -255,12 +255,12 @@ public class FeedforwardTuner {
             sleep(50);  // Wait for motors to respond
 
             double velocity = getAverageVelocity();
-            telemetry.log().add(String.format("  Power: %.3f → Velocity: %.1f in/s", power, velocity));
+            System.out.println(String.format("  Power: %.3f → Velocity: %.1f in/s", power, velocity));
 
             // Check if robot started moving (velocity increased significantly)
             if (velocity > KS_VELOCITY_THRESHOLD && velocity > lastVelocity * 1.5) {
-                telemetry.log().add(String.format("  ✓ kS FOUND: %.4f", power));
-                telemetry.log().add(String.format("  Distance traveled: %.1f inches", totalDistanceTraveled));
+                System.out.println(String.format("  ✓ kS FOUND: %.4f", power));
+                System.out.println(String.format("  Distance traveled: %.1f inches", totalDistanceTraveled));
                 return power;
             }
 
@@ -269,8 +269,8 @@ public class FeedforwardTuner {
         }
 
         // Timeout - return default value
-        telemetry.log().add("  ⚠ TIMEOUT - Using default kS: 0.1500");
-        telemetry.log().add("  Robot did not start moving within power limit");
+        System.out.println("  ⚠ TIMEOUT - Using default kS: 0.1500");
+        System.out.println("  Robot did not start moving within power limit");
         return 0.15;
     }
 
@@ -282,15 +282,15 @@ public class FeedforwardTuner {
      * @return the calculated kV value
      */
     private double tuneKV() {
-        telemetry.log().add("  Testing power levels: 20%, 40%, 60%, 80%");
-        telemetry.log().add("");
+        System.out.println("  Testing power levels: 20%, 40%, 60%, 80%");
+        System.out.println("");
 
         double[] powers = KV_TEST_POWERS;
         double[] velocities = new double[powers.length];
 
         // Test each power level
         for (int i = 0; i < powers.length; i++) {
-            telemetry.log().add(String.format("  Testing %d%% power...", (int)(powers[i] * 100)));
+            System.out.println(String.format("  Testing %d%% power...", (int)(powers[i] * 100)));
 
             drive.swerve.drive(new ChassisSpeeds(powers[i], 0, 0));
 
@@ -308,8 +308,8 @@ public class FeedforwardTuner {
 
                 // Safety checks before each sample
                 if (isStopRequested()) {
-                    telemetry.log().add("");
-                    telemetry.log().add("  EMERGENCY STOP - Tuning cancelled!");
+                    System.out.println("");
+                    System.out.println("  EMERGENCY STOP - Tuning cancelled!");
                     drive.swerve.stop();
                     return calculateKVPreliminary(powers, velocities, i);
                 }
@@ -324,19 +324,19 @@ public class FeedforwardTuner {
 
                 // Stuck detection - if velocity is too low for the power applied
                 if (j > KV_SAMPLES / 2 && velocity < STUCK_VELOCITY_THRESHOLD && powers[i] > 0.4) {
-                    telemetry.log().add("");
-                    telemetry.log().add("  ⚠ SAFETY: Robot appears stuck!");
-                    telemetry.log().add("  Very low velocity despite high power applied.");
+                    System.out.println("");
+                    System.out.println("  ⚠ SAFETY: Robot appears stuck!");
+                    System.out.println("  Very low velocity despite high power applied.");
                     drive.swerve.stop();
                     return calculateKVPreliminary(powers, velocities, i);
                 }
             }
 
             velocities[i] = sumVelocity / KV_SAMPLES;
-            telemetry.log().add(String.format("    → Measured: %.1f in/s", velocities[i]));
-            telemetry.log().add(String.format("    → Distance: %.1f / %.1f inches",
+            System.out.println(String.format("    → Measured: %.1f in/s", velocities[i]));
+            System.out.println(String.format("    → Distance: %.1f / %.1f inches",
                 totalDistanceTraveled, MAX_TRAVEL_DISTANCE));
-            telemetry.log().add("");
+            System.out.println("");
 
             // Brief pause between levels
             drive.swerve.stop();
@@ -344,7 +344,7 @@ public class FeedforwardTuner {
         }
 
         // Calculate kV using linear regression
-        telemetry.log().add("  Calculating kV using linear regression...");
+        System.out.println("  Calculating kV using linear regression...");
 
         double sumX = 0, sumY = 0, sumXY = 0, sumX2 = 0;
         int n = powers.length;
@@ -360,13 +360,13 @@ public class FeedforwardTuner {
         double slope = (n * sumXY - sumX * sumY) / (n * sumX2 - sumX * sumX);
         double intercept = (sumY - slope * sumX) / n;
 
-        telemetry.log().add("  Regression Results:");
+        System.out.println("  Regression Results:");
         for (int i = 0; i < n; i++) {
-            telemetry.log().add(String.format("    %d%% Power → %.1f in/s",
+            System.out.println(String.format("    %d%% Power → %.1f in/s",
                 (int)(powers[i] * 100), velocities[i]));
         }
-        telemetry.log().add(String.format("  kV (Slope):    %.4f", slope));
-        telemetry.log().add(String.format("  kS (Intercept): %.4f", intercept));
+        System.out.println(String.format("  kV (Slope):    %.4f", slope));
+        System.out.println(String.format("  kS (Intercept): %.4f", intercept));
 
         // kV is the slope
         return slope;
@@ -384,14 +384,14 @@ public class FeedforwardTuner {
         // Use only valid data points
         int n = validCount;
         if (n < 2) {
-            telemetry.log().add("");
-            telemetry.log().add("  ⚠ WARNING: Insufficient data for kV calculation!");
-            telemetry.log().add("  Using default kV: 1.0");
+            System.out.println("");
+            System.out.println("  ⚠ WARNING: Insufficient data for kV calculation!");
+            System.out.println("  Using default kV: 1.0");
             return 1.0;  // Default value
         }
 
-        telemetry.log().add("");
-        telemetry.log().add("  Calculating kV from partial data...");
+        System.out.println("");
+        System.out.println("  Calculating kV from partial data...");
 
         double sumX = 0, sumY = 0, sumXY = 0, sumX2 = 0;
 
@@ -405,7 +405,7 @@ public class FeedforwardTuner {
 
         double slope = (n * sumXY - sumX * sumY) / (n * sumX2 - sumX * sumX);
 
-        telemetry.log().add(String.format("  kV (from %d data points): %.4f", n, slope));
+        System.out.println(String.format("  kV (from %d data points): %.4f", n, slope));
         return slope;
     }
 
@@ -427,7 +427,7 @@ public class FeedforwardTuner {
      * Checks if the driver has requested a stop.
      */
     private boolean isStopRequested() {
-        return Robot.getInstance().opModeIsActive() == false;
+        return Thread.currentThread().isInterrupted();
     }
 
     /**
@@ -470,9 +470,9 @@ public class FeedforwardTuner {
         totalDistanceTraveled = Math.hypot(currentX - startingX, currentY - startingY);
 
         if (totalDistanceTraveled > MAX_TRAVEL_DISTANCE) {
-            telemetry.log().add("");
-            telemetry.log().add("  ⚠ SAFETY: Distance limit reached!");
-            telemetry.log().add(String.format("  Traveled: %.1f inches (limit: %.1f)",
+            System.out.println("");
+            System.out.println("  ⚠ SAFETY: Distance limit reached!");
+            System.out.println(String.format("  Traveled: %.1f inches (limit: %.1f)",
                 totalDistanceTraveled, MAX_TRAVEL_DISTANCE));
             return true;
         }
@@ -491,9 +491,9 @@ public class FeedforwardTuner {
         double levelTime = totalTuningTime - levelStartTime;
 
         if (levelTime > MAX_TIME_PER_LEVEL) {
-            telemetry.log().add("");
-            telemetry.log().add("  ⚠ SAFETY: Time limit for this level reached!");
-            telemetry.log().add(String.format("  Level time: %.1f seconds (limit: %.1f)",
+            System.out.println("");
+            System.out.println("  ⚠ SAFETY: Time limit for this level reached!");
+            System.out.println(String.format("  Level time: %.1f seconds (limit: %.1f)",
                 levelTime, MAX_TIME_PER_LEVEL));
             return true;
         }

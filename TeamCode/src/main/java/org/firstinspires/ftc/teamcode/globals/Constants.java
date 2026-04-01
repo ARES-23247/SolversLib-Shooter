@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.globals;
 
+import org.firstinspires.ftc.teamcode.commandbase.subsystems.swerve.encoders.SwerveEncoderFactory;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 
 /**

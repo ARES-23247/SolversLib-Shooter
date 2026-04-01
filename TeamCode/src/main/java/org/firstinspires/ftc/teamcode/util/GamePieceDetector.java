@@ -68,7 +68,7 @@ public class GamePieceDetector {
         // Use 4×4 resolution for faster processing and wider zones
         this.sensor = new VL53L5CX(srsHub);
         try {
-            sensor.setResolution(VL53L5CX.Resolution.RESOLUTION_4X4);
+            sensor.setResolution(VL53L5CX.Resolution.RES_4X4);
         } catch (Exception e) {
             System.err.println("Failed to set resolution: " + e.getMessage());
         }
@@ -81,7 +81,7 @@ public class GamePieceDetector {
      * @param i2cAddress Custom I2C address
      */
     public GamePieceDetector(SRSHub srsHub, int i2cAddress) {
-        this(new VL53L5CX(srsHub, i2cAddress));
+        this.sensor = new VL53L5CX(srsHub, i2cAddress);
     }
 
     /**

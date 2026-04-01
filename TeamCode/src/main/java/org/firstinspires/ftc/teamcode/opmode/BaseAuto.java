@@ -2,7 +2,7 @@ package org.firstinspires.ftc.teamcode.opmode;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
-import com.outoftheboxrobotics.photoncore.PhotonCore;
+
 import com.pedropathing.geometry.BezierCurve;
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
@@ -226,7 +226,7 @@ public class BaseAuto extends CommandOpMode {
         return new com.seattlesolvers.solverslib.command.InstantCommand(() -> {
             // TODO: Implement scoring mechanism
             // Example: robot.outtake.score();
-            telemetryData.log().add("Scoring game piece");
+            System.out.println("Scoring game piece");
         });
     }
 
@@ -240,7 +240,7 @@ public class BaseAuto extends CommandOpMode {
         return new com.seattlesolvers.solverslib.command.InstantCommand(() -> {
             // TODO: Implement intake mechanism
             // Example: robot.intake.grab();
-            telemetryData.log().add("Intaking game piece");
+            System.out.println("Intaking game piece");
         });
     }
 
@@ -254,7 +254,7 @@ public class BaseAuto extends CommandOpMode {
         return new com.seattlesolvers.solverslib.command.InstantCommand(() -> {
             // TODO: Implement hang mechanism
             // Example: robot.hang.level1Ascent();
-            telemetryData.log().add("Starting hang");
+            System.out.println("Starting hang");
         });
     }
 
@@ -364,8 +364,8 @@ public class BaseAuto extends CommandOpMode {
 
         telemetryData.update();
 
-        PhotonCore.CONTROL_HUB.clearBulkCache();
-        PhotonCore.EXPANSION_HUB.clearBulkCache();
+
+
     }
 
     /**
@@ -411,8 +411,6 @@ public class BaseAuto extends CommandOpMode {
         telemetryData.addData("Auto Loop Time", timer.milliseconds());
         timer.reset();
 
-        robot.profiler.start("Run + Update");
         robot.updateLoop(telemetryData);
-        robot.profiler.end("Run + Update");
     }
 }

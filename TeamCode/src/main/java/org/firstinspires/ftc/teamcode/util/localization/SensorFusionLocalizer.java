@@ -1,7 +1,7 @@
 package org.firstinspires.ftc.teamcode.util.localization;
 
 import com.seattlesolvers.solverslib.kinematics.wpilibkinematics.ChassisSpeeds;
-import com.pedropathing.localization.Pose;
+import com.pedropathing.geometry.Pose;
 
 import org.firstinspires.ftc.teamcode.globals.GoBildaPinpointDriver;
 import org.firstinspires.ftc.teamcode.hardware.SRSHub;
