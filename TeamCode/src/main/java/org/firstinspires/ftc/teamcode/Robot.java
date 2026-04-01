@@ -457,6 +457,14 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
         // Instantiate Subsystems
         drive = new Drive();
         vision = new Vision();
+
+        // Initialize Panels Dashboard
+        try {
+            org.firstinspires.ftc.teamcode.dashboard.PanelsDashboard.getInstance().initialize();
+            RobotLog.i("Panels Dashboard: Initialized successfully");
+        } catch (Exception e) {
+            RobotLog.w("Panels Dashboard: Initialization failed - " + e.getMessage());
+        }
     }
 
     /**

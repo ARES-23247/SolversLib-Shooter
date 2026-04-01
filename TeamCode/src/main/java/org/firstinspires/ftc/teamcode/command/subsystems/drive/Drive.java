@@ -8,17 +8,13 @@ import org.firstinspires.ftc.teamcode.hardware.OctoQuadFWv3;
 import org.firstinspires.ftc.teamcode.util.localization.SensorFusionLocalizer;
 import org.firstinspires.ftc.teamcode.util.localization.SwerveOdometry;
 import org.firstinspires.ftc.teamcode.util.monitoring.PinpointHealthMonitor;
+import org.firstinspires.ftc.teamcode.dashboard.PanelsDashboard;
 
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.Pose;
 import com.seattlesolvers.solverslib.kinematics.wpilibkinematics.ChassisSpeeds;
 import com.seattlesolvers.solverslib.hardware.motors.MotorEx;
 import com.seattlesolvers.solverslib.hardware.motors.CRServoEx;
-import com.bylazar.telemetry.PanelsTelemetry;
-import com.bylazar.configurables.PanelsConfigurables;
-import com.bylazar.field.PanelsField;
-import com.bylazar.field.Canvas;
-import com.bylazar.configurables.annotations.Configurable;
 
 import static org.firstinspires.ftc.teamcode.Constants.*;
 
@@ -620,131 +616,58 @@ public class Drive extends SubsystemBase {
             localizerData = robot.getLocalizerData();
         }
 
-        // Dashboard Telemetry & Field Drawing (disabled - switching to Panels)
-        // TODO: Implement Panels visualization
-        // Currently using standard telemetry to driver station only
-        // Panels dashboard configuration will be added separately
-        /*
-        if (robot.telemetry != null && org.firstinspires.ftc.teamcode.Constants.ENABLE_DASHBOARD_OVERLAY) {
-            // FTC Dashboard code removed - will be replaced with Panels
-            TelemetryPacket packet = new TelemetryPacket();
-            Canvas field = packet.fieldOverlay();
+        // ===== Panels Dashboard Update =====
+        if (org.firstinspires.ftc.teamcode.Constants.ENABLE_DASHBOARD_OVERLAY) {
+            PanelsDashboard dashboard = PanelsDashboard.getInstance();
 
-            // OctoQuad Localizer Telemetry (if enabled and ready)
-            if (localizerReady && localizerData != null) {
-                packet.put("OctoQuad Status", localizerData.localizerStatus.toString());
-                packet.put("OctoQuad X (mm)", localizerData.posX_mm);
-                packet.put("OctoQuad Y (mm)", localizerData.posY_mm);
-                packet.put("OctoQuad Heading (deg)", Math.toDegrees(localizerData.heading_rad));
-                packet.put("OctoQuad VelX (mm/s)", localizerData.velX_mmS);
-                packet.put("OctoQuad VelY (mm/s)", localizerData.velY_mmS);
-                packet.put("OctoQuad CRC Valid", localizerData.crcOk);
-            } else if (org.firstinspires.ftc.teamcode.Constants.LOCALIZER_ENABLED) {
-                packet.put("OctoQuad Status", robot.getLocalizerStatus().toString());
-            }
+            // Update robot pose
+            dashboard.setRobotPose(currentPose);
 
-            // SRS Hub Current Telemetry (if enabled)
+            // Update performance metrics
+            dashboard.setLoopTime(lastLoopTime);
+            dashboard.setBatteryVoltage(batteryVoltage);
+
+            // Update current monitoring
             if (srsHubReady) {
-                packet.put("Current Draw (A)", String.format("%.2f", currentDraw));
-                packet.put("SRS Hub Status", robot.srsHub.disconnected() ? "DISCONNECTED" : "OK");
-                packet.put("Current Limiting Active", currentLimitingActive ? "YES" : "NO");
-                packet.put("Current Limit Scale", String.format("%.2f", swerve.getCurrentLimitScale()));
+                dashboard.setCurrentDraw(currentDraw);
+                dashboard.setCurrentLimitingActive(currentLimitingActive);
             }
 
-            // Power and Performance Telemetry
-            packet.put("Battery Voltage (V)", String.format("%.2f", batteryVoltage));
-            packet.put("Loop Time (ms)", String.format("%.2f", lastLoopTime * 1000));
-            packet.put("Loop Frequency (Hz)", String.format("%.1f", 1.0 / Math.max(lastLoopTime, 0.001)));
+            // Update drive inputs
+            dashboard.setInputs(
+                teleOpSpeeds.vxMetersPerSecond,
+                teleOpSpeeds.vyMetersPerSecond,
+                teleOpSpeeds.omegaRadiansPerSecond,
+                isTeleOpMode ? "TeleOp" : "Auto"
+            );
 
-            // Encoder Type Telemetry
-            packet.put("Swerve Encoder Type", swerve.getEncoderType());
+            dashboard.setEncoderType(swerve.getEncoderType());
 
-            // Controller Input Telemetry
-            packet.put("Input Forward", String.format("%.3f", teleOpSpeeds.vxMetersPerSecond));
-            packet.put("Input Lateral", String.format("%.3f", teleOpSpeeds.vyMetersPerSecond));
-            packet.put("Input Turn", String.format("%.3f", teleOpSpeeds.omegaRadiansPerSecond));
-            packet.put("Input Mode", isTeleOpMode ? "TeleOp" : "Auto");
+            // Update IMU backup status
+            if (OCTOQUAD_IMU_BACKUP_ENABLED) {
+                dashboard.setIMUStatus(robot.getIMUSource(), robot.getOctoQuadIMUOffset());
 
-            // Sensor Fusion Telemetry (if enabled)
-            if (ENABLE_SENSOR_FUSION && sensorFusion != null) {
-                fusedPose = sensorFusion.getEstimatedPose();
-                double[] posUncertainty = sensorFusion.getPositionUncertainty();
-                double headingUncertainty = sensorFusion.getHeadingUncertainty();
-
-                packet.put("Fusion X (in)", String.format("%.2f", fusedPose.getX()));
-                packet.put("Fusion Y (in)", String.format("%.2f", fusedPose.getY()));
-                packet.put("Fusion Heading (deg)", String.format("%.2f", Math.toDegrees(fusedPose.getHeading())));
-                packet.put("Fusion X Uncertainty (in)", String.format("%.3f", posUncertainty[0]));
-                packet.put("Fusion Y Uncertainty (in)", String.format("%.3f", posUncertainty[1]));
-                packet.put("Fusion Heading Uncertainty (deg)", String.format("%.3f", Math.toDegrees(headingUncertainty)));
-
-                // Swerve odometry telemetry
-                packet.put("Swerve Odometry X (in)", String.format("%.2f", swerveOdometry.getX()));
-                packet.put("Swerve Odometry Y (in)", String.format("%.2f", swerveOdometry.getY()));
-                packet.put("Swerve Odometry Heading (deg)", String.format("%.2f", Math.toDegrees(swerveOdometry.getHeading())));
-
-                // Pinpoint odometry telemetry
-                if (robot.pinpoint != null) {
-                    packet.put("Pinpoint X (in)", String.format("%.2f", robot.pinpoint.getPosition().getX(org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit.INCH)));
-                    packet.put("Pinpoint Y (in)", String.format("%.2f", robot.pinpoint.getPosition().getY(org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit.INCH)));
-                    packet.put("Pinpoint Heading (deg)", String.format("%.2f", robot.pinpoint.getHeading(org.firstinspires.ftc.robotcore.external.navigation.AngleUnit.RADIANS)));
-
-                    // Check if Pinpoint is out of bounds
-                    if (ENABLE_PINPOINT_BOUNDARY_CHECK) {
-                        boolean outOfBounds = !isWithinFieldBounds(robot.pinpoint.getPosition().getX(org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit.INCH), robot.pinpoint.getPosition().getY(org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit.INCH));
-                        packet.put("Pinpoint Out of Bounds", outOfBounds ? "YES" : "NO");
-                    }
-
-                    if (ENABLE_PINPOINT_HEALTH_MONITOR) {
-                        String healthStatus = pinpointHealthMonitor.isHealthy() ? "YES" : "NO (DRIFTED)";
-                        packet.put("Pinpoint Healthy", healthStatus);
-                        packet.put("Pinpoint Bad Count", pinpointHealthMonitor.getBadReadingCount());
-
-                        if (ENABLE_PINPOINT_AUTO_RESET && !pinpointHealthMonitor.isHealthy()) {
-                            ChassisSpeeds estimatedVel = sensorFusion.getEstimatedVelocity();
-                            double robotVelocity = Math.hypot(estimatedVel.vxMetersPerSecond, estimatedVel.vyMetersPerSecond);
-                            posUncertainty = sensorFusion.getPositionUncertainty();
-                            double maxUncertainty = Math.max(posUncertainty[0], posUncertainty[1]);
-                            boolean visionTagVisible = (robot.vision != null && robot.vision.isTagVisible());
-
-                            boolean safeToReset = pinpointHealthMonitor.isSafeToReset(
-                                robotVelocity, maxUncertainty, visionTagVisible,
-                                PINPOINT_AUTO_RESET_MAX_VELOCITY, PINPOINT_AUTO_RESET_MAX_UNCERTAINTY
-                            );
-
-                            packet.put("Pinpoint Can Auto-Reset", safeToReset ? "YES" : "NO");
-                            packet.put("Reset Check Velocity", String.format("%.2f in/s", robotVelocity));
-                            packet.put("Reset Check Uncertainty", String.format("%.2f in", maxUncertainty));
-                            packet.put("Reset Check Vision", visionTagVisible ? "YES" : "NO");
-                        }
-
-                        // Log IMU backup status
-                        if (OCTOQUAD_IMU_BACKUP_ENABLED) {
-                            packet.put("IMU Source", robot.getIMUSource());
-                            packet.put("OctoQuad IMU Offset (rad)", String.format("%.3f", robot.getOctoQuadIMUOffset()));
-                        }
-                    }
+                // Update Pinpoint health
+                if (ENABLE_PINPOINT_HEALTH_MONITOR && robot.pinpoint != null) {
+                    dashboard.setPinpointStatus(
+                        pinpointHealthMonitor.isHealthy(),
+                        pinpointHealthMonitor.getBadReadingCount()
+                    );
                 }
             }
 
-            // Draw Robot Box (18x18 assumed default)
-            field.setStroke("#3F51B5");
-            field.strokeRect(currentPose.getX() - 9, currentPose.getY() - 9, 18, 18);
+            // Update vision status
+            if (robot.vision != null) {
+                dashboard.setVisionStatus(
+                    robot.vision.isTagVisible(),
+                    robot.vision.getActiveCameras().size(),
+                    robot.vision.getHealthyCameraCount()
+                );
+            }
 
-            // Draw Heading Line
-            field.strokeLine(
-                currentPose.getX(), currentPose.getY(),
-                currentPose.getX() + 9 * Math.cos(currentPose.getHeading()),
-                currentPose.getY() + 9 * Math.sin(currentPose.getHeading())
-            );
-
-            // Fetch Swerve Kinematics Target/Actual Logs
-            swerve.drawTelemetry(packet, currentPose);
-
-            // Send packet immediately to Dashboard HTML websocket
-            FtcDashboard.getInstance().sendTelemetryPacket(packet);
+            // Send all data to Panels dashboard
+            dashboard.update();
         }
-        */
 
         // CSV Logging
         if (robot.logger != null) {
