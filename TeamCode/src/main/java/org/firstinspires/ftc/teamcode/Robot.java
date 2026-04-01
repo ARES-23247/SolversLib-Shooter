@@ -739,7 +739,7 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
      * <p><b>Heading Source Priority:</b></p>
      * <ol>
      *   <li><b>Primary:</b> GoBilda Pinpoint IMU (most accurate)</li>
-     *   <li><b>Backup:</b> OctoQuad IMU (less accurate but reliable)</li>
+     *   <li><b>Backup:</b> OctoQuad IMU with software offset (less accurate but reliable)</li>
      * </ol>
      *
      * @return heading in radians, or 0.0 if both IMUs are unavailable
@@ -763,14 +763,16 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
 
                 if (data != null && data.isPoseDataValid()) {
                     // Apply heading scalar from Constants
-                    double heading = data.heading_rad *
+                    double rawHeading = data.heading_rad *
                         org.firstinspires.ftc.teamcode.Constants.OCTOQUAD_IMU_HEADING_SCALAR;
+
+                    // Apply software calibration offset
+                    double heading = rawHeading + octoquadIMUOffset;
 
                     // Normalize to [-π, π]
                     while (heading > Math.PI) heading -= 2 * Math.PI;
                     while (heading < -Math.PI) heading += 2 * Math.PI;
 
-                    RobotLog.i("IMU: Using OctoQuad IMU backup (heading=" + String.format("%.3f", heading) + " rad)");
                     return heading;
                 }
             } catch (Exception e) {
@@ -803,5 +805,166 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
             }
         }
         return "NONE";
+    }
+
+    // ===== OctoQuad IMU Calibration Methods =====
+
+    /**
+     * Software offset for OctoQuad IMU to align with true heading.
+     * <p>
+     * OctoQuad IMU cannot be reset to an arbitrary heading, so we maintain
+     * a software offset that's applied to the raw IMU reading.</p>
+     */
+    private double octoquadIMUOffset = 0.0;
+
+    /**
+     * Timestamp of last OctoQuad IMU calibration (for throttling).
+     */
+    private long lastOctoquadCalibrationTime = 0;
+
+    /**
+     * Calibrates the OctoQuad IMU offset to match a reference heading.
+     *
+     * <p>This method calculates the offset between the raw OctoQuad IMU heading
+     * and the reference heading (typically from vision or fused pose). This offset
+     * is then applied to all subsequent OctoQuad IMU readings.</p>
+     *
+     * <p><b>When to call:</b> Call this when conditions are ideal for calibration:</p>
+     * <ul>
+     *   <li>Robot is stationary</li>
+     *   <li>Vision has good data (tag visible + low uncertainty)</li>
+     *   <li>OctoQuad IMU is currently being used as backup</li>
+     * </ul>
+     *
+     * @param referenceHeading the reference heading to calibrate to (radians)
+     * @return true if calibration succeeded, false otherwise
+     */
+    public boolean calibrateOctoQuadIMU(double referenceHeading) {
+        if (!org.firstinspires.ftc.teamcode.Constants.OCTOQUAD_IMU_BACKUP_ENABLED) {
+            return false;  // OctoQuad IMU backup disabled
+        }
+
+        try {
+            // Read raw OctoQuad IMU heading
+            org.firstinspires.ftc.teamcode.hardware.OctoQuadFWv3.LocalizerDataBlock data =
+                octoquad.readLocalizerData();
+
+            if (data == null || !data.isPoseDataValid()) {
+                RobotLog.w("OctoQuad IMU: Cannot calibrate - invalid data");
+                return false;
+            }
+
+            // Get raw OctoQuad IMU heading (with scalar applied)
+            double rawOctoquadHeading = data.heading_rad *
+                org.firstinspires.ftc.teamcode.Constants.OCTOQUAD_IMU_HEADING_SCALAR;
+
+            // Normalize to [-π, π]
+            while (rawOctoquadHeading > Math.PI) rawOctoquadHeading -= 2 * Math.PI;
+            while (rawOctoquadHeading < -Math.PI) rawOctoquadHeading += 2 * Math.PI;
+
+            // Calculate offset: reference = raw + offset  =>  offset = reference - raw
+            double newOffset = referenceHeading - rawOctoquadHeading;
+
+            // Normalize offset to [-π, π]
+            while (newOffset > Math.PI) newOffset -= 2 * Math.PI;
+            while (newOffset < -Math.PI) newOffset += 2 * Math.PI;
+
+            // Check if heading difference is within acceptable range
+            double headingDiff = Math.abs(newOffset);
+            double maxDiff = org.firstinspires.ftc.teamcode.Constants.OCTOQUAD_IMU_CALIBRATE_MAX_HEADING_DIFF;
+
+            if (headingDiff > maxDiff) {
+                RobotLog.w("OctoQuad IMU: Calibration skipped - heading diff too large: " +
+                          String.format("%.3f rad > %.3f rad", headingDiff, maxDiff));
+                return false;
+            }
+
+            // Update offset
+            octoquadIMUOffset = newOffset;
+            lastOctoquadCalibrationTime = System.currentTimeMillis();
+
+            RobotLog.i("OctoQuad IMU: Calibrated offset=" + String.format("%.3f rad", octoquadIMUOffset) +
+                      " (raw=" + String.format("%.3f", rawOctoquadHeading) +
+                      " ref=" + String.format("%.3f", referenceHeading) + ")");
+
+            return true;
+
+        } catch (Exception e) {
+            RobotLog.e("OctoQuad IMU: Calibration failed: " + e.getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Gets the OctoQuad IMU offset value.
+     *
+     * @return current offset in radians
+     */
+    public double getOctoQuadIMUOffset() {
+        return octoquadIMUOffset;
+    }
+
+    /**
+     * Resets the OctoQuad IMU offset to zero.
+     *
+     * <p>This should be called when switching from Pinpoint to OctoQuad IMU backup,
+     * or when the robot is first initialized.</p>
+     */
+    public void resetOctoQuadIMUOffset() {
+        octoquadIMUOffset = 0.0;
+        lastOctoquadCalibrationTime = 0;
+        RobotLog.i("OctoQuad IMU: Offset reset to 0");
+    }
+
+    /**
+     * Checks if conditions are good for OctoQuad IMU calibration.
+     *
+     * <p>Conditions for safe calibration:</p>
+     * <ul>
+     *   <li>Robot is stationary (velocity below threshold)</li>
+     *   <li>Vision has good data (low uncertainty)</li>
+     *   <li>OctoQuad IMU is currently active as backup</li>
+     *   <li>Enough time has passed since last calibration (throttling)</li>
+     * </ul>
+     *
+     * @param robotVelocity current robot velocity (inches/second)
+     * @param visionUncertainty current vision position uncertainty (inches)
+     * @return true if safe to calibrate OctoQuad IMU, false otherwise
+     */
+    public boolean isSafeToCalibrateOctoQuadIMU(double robotVelocity, double visionUncertainty) {
+        // Check if OctoQuad IMU backup is enabled
+        if (!org.firstinspires.ftc.teamcode.Constants.OCTOQUAD_IMU_BACKUP_ENABLED) {
+            return false;
+        }
+
+        // Check if auto-calibrate is enabled
+        if (!org.firstinspires.ftc.teamcode.Constants.ENABLE_OCTOQUAD_IMU_AUTO_CALIBRATE) {
+            return false;
+        }
+
+        // Check if OctoQuad IMU is currently being used as backup
+        if (isPinpointHealthy()) {
+            return false;  // Pinpoint is healthy, no need to calibrate OctoQuad
+        }
+
+        // Check if robot is stationary
+        double maxVelocity = org.firstinspires.ftc.teamcode.Constants.OCTOQUAD_IMU_CALIBRATE_MAX_VELOCITY;
+        if (Math.abs(robotVelocity) > maxVelocity) {
+            return false;  // Robot is moving too fast
+        }
+
+        // Check if vision has good data
+        double maxUncertainty = org.firstinspires.ftc.teamcode.Constants.OCTOQUAD_IMU_CALIBRATE_MAX_UNCERTAINTY;
+        if (visionUncertainty > maxUncertainty) {
+            return false;  // Vision uncertainty too high
+        }
+
+        // Check calibration throttling (minimum 1 second between calibrations)
+        long timeSinceLastCalibration = System.currentTimeMillis() - lastOctoquadCalibrationTime;
+        if (timeSinceLastCalibration < 1000) {
+            return false;  // Too soon since last calibration
+        }
+
+        return true;  // All conditions met
     }
 }

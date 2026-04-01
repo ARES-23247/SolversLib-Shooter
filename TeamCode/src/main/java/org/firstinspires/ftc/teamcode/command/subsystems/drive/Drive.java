@@ -544,6 +544,38 @@ public class Drive extends SubsystemBase {
             }
         }
 
+        // ===== OctoQuad IMU Backup Auto-Calibration Logic =====
+        // If OctoQuad IMU is being used as backup and conditions are safe, calibrate its offset
+        if (ENABLE_OCTOQUAD_IMU_AUTO_CALIBRATE && OCTOQUAD_IMU_BACKUP_ENABLED) {
+            // Check if OctoQuad IMU is currently being used as backup
+            if (!robot.isPinpointHealthy()) {
+                // Get robot velocity and vision uncertainty
+                ChassisSpeeds estimatedVel = sensorFusion.getEstimatedVelocity();
+                double robotVelocity = Math.hypot(estimatedVel.vxMetersPerSecond, estimatedVel.vyMetersPerSecond);
+                double[] posUncertainty = sensorFusion.getPositionUncertainty();
+                double maxUncertainty = Math.max(posUncertainty[0], posUncertainty[1]);
+
+                // Check if safe to calibrate OctoQuad IMU
+                boolean safeToCalibrate = robot.isSafeToCalibrateOctoQuadIMU(
+                    robotVelocity,
+                    maxUncertainty
+                );
+
+                if (safeToCalibrate) {
+                    // Calibrate OctoQuad IMU offset to fused pose heading
+                    double fusedHeading = fusedPose.getHeading();
+                    boolean calibrated = robot.calibrateOctoQuadIMU(fusedHeading);
+
+                    if (calibrated && robot.telemetry != null) {
+                        System.out.println("OctoQuad IMU Auto-Calibrate: Stationary + Good Vision");
+                    }
+                }
+            } else {
+                // Pinpoint is healthy again, reset OctoQuad IMU offset for next time
+                robot.resetOctoQuadIMUOffset();
+            }
+        }
+
         // Update PedroPathing localizer with fused pose
         follower.setPose(fusedPose);
 

@@ -1379,6 +1379,58 @@ public class Constants {
      */
     public static final double PINPOINT_AUTO_RESET_MAX_UNCERTAINTY = 1.5;
 
+    // ===== OctoQuad IMU Backup Auto-Reset Configuration =====
+
+    /**
+     * Whether to enable automatic OctoQuad IMU offset calibration when used as backup.
+     * <p>
+     * When enabled, the system will automatically calibrate the OctoQuad IMU offset to match
+     * the fused pose estimate when all of the following conditions are met:</p>
+     * <ul>
+     *   <li>OctoQuad IMU is currently active as backup (Pinpoint failed)</li>
+     *   <li>Robot is stationary (velocity below threshold)</li>
+     *   <li>Vision has good data (tag visible + low uncertainty)</li>
+     * </ul>
+     * <p>
+     * This keeps the OctoQuad IMU aligned with the true heading while it's being used as backup.
+     * </p>
+     * <p>
+     * <b>Note:</b> OctoQuad IMU cannot be reset to an arbitrary heading like Pinpoint.
+     * Instead, we maintain a software offset that's applied to the raw OctoQuad IMU reading.
+     * </p>
+     */
+    public static final boolean ENABLE_OCTOQUAD_IMU_AUTO_CALIBRATE = true;
+
+    /**
+     * Maximum robot velocity to be considered "stationary" for OctoQuad IMU calibration (inches/second).
+     * <p>
+     * The robot must be moving slower than this velocity for OctoQuad IMU to be calibrated.
+     * This prevents calibration while the robot is moving, which could cause sudden jumps.</p>
+     * <p>
+     * <b>Recommended:</b> 0.5-1.0 inches/second (very slow movement)</p>
+     */
+    public static final double OCTOQUAD_IMU_CALIBRATE_MAX_VELOCITY = 1.0;
+
+    /**
+     * Maximum vision position uncertainty for OctoQuad IMU calibration (inches).
+     * <p>
+     * The fused pose uncertainty must be below this threshold for OctoQuad IMU to be calibrated.
+     * This ensures we only calibrate when vision has a confident, accurate measurement.</p>
+     * <p>
+     * <b>Recommended:</b> 1.0-2.0 inches (requires good vision lock)</p>
+     */
+    public static final double OCTOQUAD_IMU_CALIBRATE_MAX_UNCERTAINTY = 1.5;
+
+    /**
+     * Maximum heading difference between OctoQuad IMU and fused pose for calibration (radians).
+     * <p>
+     * If the OctoQuad IMU heading differs from the fused pose by more than this amount,
+     * the calibration is skipped to prevent calibrating to bad data.</p>
+     * <p>
+     * <b>Recommended:</b> 0.1-0.2 radians (~5-10 degrees)</p>
+     */
+    public static final double OCTOQUAD_IMU_CALIBRATE_MAX_HEADING_DIFF = 0.15;
+
     // ===== Tuning Constants =====
 
     /**
