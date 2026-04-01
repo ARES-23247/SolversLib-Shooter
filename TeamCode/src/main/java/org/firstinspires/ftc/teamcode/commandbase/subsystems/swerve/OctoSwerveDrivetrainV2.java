@@ -11,7 +11,7 @@ import com.seattlesolvers.solverslib.geometry.Vector2d;
 import org.firstinspires.ftc.teamcode.hardware.SRSHub;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.dashboard.canvas.Canvas;
-import com.pedropathing.localization.Pose;
+import com.pedropathing.geometry.Pose;
 import org.firstinspires.ftc.teamcode.util.DataLogger;
 import org.firstinspires.ftc.teamcode.util.control.CurrentLimiter;
 

@@ -115,13 +115,13 @@ public class ObjectDetection extends SubsystemBase {
      */
     @Override
     public void periodic() {
-        var result = robot.limelight.getRawResult();
+        com.qualcomm.hardware.limelightvision.LLResult result = robot.limelight.getLatestResult();
 
         if (result != null) {
             lastDetected = result.isValid();
-            lastTx = result.tx;
-            lastTy = result.ty;
-            lastTa = result.ta;
+            lastTx = result.getTx();
+            lastTy = result.getTy();
+            lastTa = result.getTa();
         } else {
             lastDetected = false;
         }

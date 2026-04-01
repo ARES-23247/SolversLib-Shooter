@@ -10,7 +10,7 @@ import org.firstinspires.ftc.teamcode.util.localization.SwerveOdometry;
 import org.firstinspires.ftc.teamcode.util.monitoring.PinpointHealthMonitor;
 
 import com.pedropathing.follower.Follower;
-import com.pedropathing.localization.Pose;
+import com.pedropathing.geometry.Pose;
 import com.seattlesolvers.solverslib.kinematics.wpilibkinematics.ChassisSpeeds;
 import com.seattlesolvers.solverslib.hardware.motors.MotorEx;
 import com.seattlesolvers.solverslib.hardware.motors.CRServoEx;
@@ -468,9 +468,9 @@ public class Drive extends SubsystemBase {
         // Get current chassis speeds for EKF prediction step
         ChassisSpeeds currentSpeeds = isTeleOpMode ? teleOpSpeeds :
             (follower.isBusy() ? new ChassisSpeeds(
-                follower.getTotalPower().getX(),
-                follower.getTotalPower().getY(),
-                follower.getTotalPower().getHeading()
+                follower.getPose().getX(),
+                follower.getPose().getY(),
+                follower.getPose().getHeading()
             ) : new ChassisSpeeds(0, 0, 0));
 
         // Predict with swerve odometry (high frequency)
@@ -480,9 +480,9 @@ public class Drive extends SubsystemBase {
         // Correct with Pinpoint odometry (high accuracy) - only if healthy
         if (robot.pinpoint != null) {
             robot.pinpoint.update();
-            double pinpointX = robot.pinpoint.getX();
-            double pinpointY = robot.pinpoint.getY();
-            double pinpointHeading = Math.toRadians(robot.pinpoint.getHeading());
+            double pinpointX = robot.pinpoint.getPosition().getX(org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit.INCH);
+            double pinpointY = robot.pinpoint.getPosition().getY(org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit.INCH);
+            double pinpointHeading = Math.toRadians(robot.pinpoint.getHeading(org.firstinspires.ftc.robotcore.external.navigation.AngleUnit.RADIANS));
 
             // Check if Pinpoint is outside field boundaries (impossible position)
             boolean pinpointOutOfBounds = ENABLE_PINPOINT_BOUNDARY_CHECK &&
@@ -539,7 +539,7 @@ public class Drive extends SubsystemBase {
 
                 // Log the reset event
                 if (robot.telemetry != null) {
-                    robot.telemetry.log().add("Pinpoint Auto-Reset: Stationary + Good Vision");
+                    System.out.println("Pinpoint Auto-Reset: Stationary + Good Vision");
                 }
             }
         }
@@ -554,7 +554,7 @@ public class Drive extends SubsystemBase {
 
         // Read current draw from SRS Hub (if available)
         double currentDraw = 0.0;
-        boolean srsHubReady = robot.org.firstinspires.ftc.teamcode.globals.Constants.SRS_HUB_ENABLED &&
+        boolean srsHubReady = org.firstinspires.ftc.teamcode.globals.Constants.SRS_HUB_ENABLED &&
                               robot.srsHub != null;
         if (srsHubReady) {
             currentDraw = robot.getCurrentDraw();
@@ -563,7 +563,7 @@ public class Drive extends SubsystemBase {
         // Apply drive commands with current limiting
         if (follower.isBusy()) {
             // Autonomous mode: Extract Pedro's desired velocities and apply with current limiting
-            Pose drivePower = follower.getTotalPower();
+            Pose drivePower = follower.getPose();
             // Pedro Pose power: x component, y component, heading component
             swerve.drive(new ChassisSpeeds(drivePower.getX(), drivePower.getY(), drivePower.getHeading()), currentDraw);
             isTeleOpMode = false;  // Auto mode takes precedence
@@ -580,7 +580,7 @@ public class Drive extends SubsystemBase {
 
         // Read OctoQuad localizer data once per loop (avoid redundant I2C reads)
         OctoQuadFWv3.LocalizerDataBlock localizerData = null;
-        boolean localizerReady = robot.org.firstinspires.ftc.teamcode.globals.Constants.LOCALIZER_ENABLED &&
+        boolean localizerReady = org.firstinspires.ftc.teamcode.globals.Constants.LOCALIZER_ENABLED &&
                                   robot.isLocalizerReady();
         if (localizerReady) {
             localizerData = robot.getLocalizerData();
@@ -600,7 +600,7 @@ public class Drive extends SubsystemBase {
                 packet.put("OctoQuad VelX (mm/s)", localizerData.velX_mmS);
                 packet.put("OctoQuad VelY (mm/s)", localizerData.velY_mmS);
                 packet.put("OctoQuad CRC Valid", localizerData.crcOk);
-            } else if (robot.org.firstinspires.ftc.teamcode.globals.Constants.LOCALIZER_ENABLED) {
+            } else if (org.firstinspires.ftc.teamcode.globals.Constants.LOCALIZER_ENABLED) {
                 packet.put("OctoQuad Status", robot.getLocalizerStatus().toString());
             }
 
@@ -628,7 +628,7 @@ public class Drive extends SubsystemBase {
 
             // Sensor Fusion Telemetry (if enabled)
             if (ENABLE_SENSOR_FUSION && sensorFusion != null) {
-                Pose fusedPose = sensorFusion.getEstimatedPose();
+                fusedPose = sensorFusion.getEstimatedPose();
                 double[] posUncertainty = sensorFusion.getPositionUncertainty();
                 double headingUncertainty = sensorFusion.getHeadingUncertainty();
 
@@ -646,13 +646,13 @@ public class Drive extends SubsystemBase {
 
                 // Pinpoint odometry telemetry
                 if (robot.pinpoint != null) {
-                    packet.put("Pinpoint X (in)", String.format("%.2f", robot.pinpoint.getX()));
-                    packet.put("Pinpoint Y (in)", String.format("%.2f", robot.pinpoint.getY()));
-                    packet.put("Pinpoint Heading (deg)", String.format("%.2f", robot.pinpoint.getHeading()));
+                    packet.put("Pinpoint X (in)", String.format("%.2f", robot.pinpoint.getPosition().getX(org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit.INCH)));
+                    packet.put("Pinpoint Y (in)", String.format("%.2f", robot.pinpoint.getPosition().getY(org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit.INCH)));
+                    packet.put("Pinpoint Heading (deg)", String.format("%.2f", robot.pinpoint.getHeading(org.firstinspires.ftc.robotcore.external.navigation.AngleUnit.RADIANS)));
 
                     // Check if Pinpoint is out of bounds
                     if (ENABLE_PINPOINT_BOUNDARY_CHECK) {
-                        boolean outOfBounds = !isWithinFieldBounds(robot.pinpoint.getX(), robot.pinpoint.getY());
+                        boolean outOfBounds = !isWithinFieldBounds(robot.pinpoint.getPosition().getX(org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit.INCH), robot.pinpoint.getPosition().getY(org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit.INCH));
                         packet.put("Pinpoint Out of Bounds", outOfBounds ? "YES" : "NO");
                     }
 
@@ -664,7 +664,7 @@ public class Drive extends SubsystemBase {
                         if (ENABLE_PINPOINT_AUTO_RESET && !pinpointHealthMonitor.isHealthy()) {
                             ChassisSpeeds estimatedVel = sensorFusion.getEstimatedVelocity();
                             double robotVelocity = Math.hypot(estimatedVel.vxMetersPerSecond, estimatedVel.vyMetersPerSecond);
-                            double[] posUncertainty = sensorFusion.getPositionUncertainty();
+                            posUncertainty = sensorFusion.getPositionUncertainty();
                             double maxUncertainty = Math.max(posUncertainty[0], posUncertainty[1]);
                             boolean visionTagVisible = (robot.vision != null && robot.vision.isTagVisible());
 
@@ -738,7 +738,7 @@ public class Drive extends SubsystemBase {
 
             // Log Sensor Fusion data (if enabled)
             if (ENABLE_SENSOR_FUSION && sensorFusion != null) {
-                Pose fusedPose = sensorFusion.getEstimatedPose();
+                fusedPose = sensorFusion.getEstimatedPose();
                 double[] posUncertainty = sensorFusion.getPositionUncertainty();
                 double headingUncertainty = sensorFusion.getHeadingUncertainty();
 
@@ -756,9 +756,9 @@ public class Drive extends SubsystemBase {
 
                 // Log Pinpoint odometry
                 if (robot.pinpoint != null) {
-                    robot.logger.addData("Pinpoint X", robot.pinpoint.getX());
-                    robot.logger.addData("Pinpoint Y", robot.pinpoint.getY());
-                    robot.logger.addData("Pinpoint Heading", robot.pinpoint.getHeading());
+                    robot.logger.addData("Pinpoint X", robot.pinpoint.getPosition().getX(org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit.INCH));
+                    robot.logger.addData("Pinpoint Y", robot.pinpoint.getPosition().getY(org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit.INCH));
+                    robot.logger.addData("Pinpoint Heading", robot.pinpoint.getHeading(org.firstinspires.ftc.robotcore.external.navigation.AngleUnit.RADIANS));
 
                     if (ENABLE_PINPOINT_HEALTH_MONITOR) {
                         robot.logger.addData("Pinpoint Healthy", pinpointHealthMonitor.isHealthy() ? 1 : 0);

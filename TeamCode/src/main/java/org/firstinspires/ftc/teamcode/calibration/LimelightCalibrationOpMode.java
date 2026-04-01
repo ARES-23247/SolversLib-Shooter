@@ -55,7 +55,8 @@ public class LimelightCalibrationOpMode extends LinearOpMode {
 
     @Override
     public void runOpMode() throws InterruptedException {
-        robot = new Robot(hardwareMap, telemetry);
+        robot = Robot.getInstance();
+robot.init(hardwareMap);
 
         // Initialize calibrator with first camera (or selected camera)
         if (robot.limelightCameras != null && robot.limelightCameras.length > 0) {
@@ -64,8 +65,8 @@ public class LimelightCalibrationOpMode extends LinearOpMode {
                 new TelemetryAdapter()
             );
         } else {
-            telemetry.log().add("ERROR: No Limelight cameras found!");
-            telemetry.log().add("Check Robot.java initialization");
+            System.out.println("ERROR: No Limelight cameras found!");
+            System.out.println("Check Robot.java initialization");
             telemetry.update();
             return;
         }
@@ -75,7 +76,7 @@ public class LimelightCalibrationOpMode extends LinearOpMode {
 
         waitForStart();
 
-        telemetry.log().add("Calibration OpMode started");
+        System.out.println("Calibration OpMode started");
         telemetry.update();
 
         while (opModeIsActive()) {
@@ -88,7 +89,7 @@ public class LimelightCalibrationOpMode extends LinearOpMode {
             sleep(50);  // 20Hz update rate
         }
 
-        telemetry.log().add("Calibration OpMode ended");
+        System.out.println("Calibration OpMode ended");
         telemetry.update();
     }
 
@@ -96,27 +97,27 @@ public class LimelightCalibrationOpMode extends LinearOpMode {
      * Displays initial calibration instructions.
      */
     private void showInstructions() {
-        telemetry.log().add("===========================================");
-        telemetry.log().add("   LIMELIGHT CALIBRATION");
-        telemetry.log().add("===========================================");
-        telemetry.log().add("");
-        telemetry.log().add("SETUP:");
-        telemetry.log().add("1. Place robot at known position:");
-        telemetry.log().add("   - " + String.format("%.1f", expectedX) + " inches from tag (X)");
-        telemetry.log().add("   - " + String.format("%.1f", expectedY) + " inches lateral (Y)");
-        telemetry.log().add("   - " + String.format("%.1f°", Math.toDegrees(expectedHeading)) + " heading");
-        telemetry.log().add("");
-        telemetry.log().add("2. Robot must be stationary");
-        telemetry.log().add("");
-        telemetry.log().add("CONTROLS:");
-        telemetry.log().add("A: Run calibration");
-        telemetry.log().add("B: Verify accuracy");
-        telemetry.log().add("X: Scan for visible tags");
-        telemetry.log().add("Y: Adjust expected X (+/- with D-pad up/down)");
-        telemetry.log().add("Left Bumper: Previous camera");
-        telemetry.log().add("Right Bumper: Next camera");
-        telemetry.log().add("");
-        telemetry.log().add("===========================================");
+        System.out.println("===========================================");
+        System.out.println("   LIMELIGHT CALIBRATION");
+        System.out.println("===========================================");
+        System.out.println("");
+        System.out.println("SETUP:");
+        System.out.println("1. Place robot at known position:");
+        System.out.println("   - " + String.format("%.1f", expectedX) + " inches from tag (X)");
+        System.out.println("   - " + String.format("%.1f", expectedY) + " inches lateral (Y)");
+        System.out.println("   - " + String.format("%.1f°", Math.toDegrees(expectedHeading)) + " heading");
+        System.out.println("");
+        System.out.println("2. Robot must be stationary");
+        System.out.println("");
+        System.out.println("CONTROLS:");
+        System.out.println("A: Run calibration");
+        System.out.println("B: Verify accuracy");
+        System.out.println("X: Scan for visible tags");
+        System.out.println("Y: Adjust expected X (+/- with D-pad up/down)");
+        System.out.println("Left Bumper: Previous camera");
+        System.out.println("Right Bumper: Next camera");
+        System.out.println("");
+        System.out.println("===========================================");
         telemetry.update();
     }
 
@@ -127,19 +128,19 @@ public class LimelightCalibrationOpMode extends LinearOpMode {
         // Adjust expected X distance
         if (gamepad1.dpad_up) {
             expectedX += 1.0;
-            telemetry.log().add(String.format("Expected X: %.1f inches", expectedX));
+            System.out.println(String.format("Expected X: %.1f inches", expectedX));
         } else if (gamepad1.dpad_down) {
             expectedX = Math.max(6.0, expectedX - 1.0);  // Minimum 6 inches
-            telemetry.log().add(String.format("Expected X: %.1f inches", expectedX));
+            System.out.println(String.format("Expected X: %.1f inches", expectedX));
         }
 
         // Adjust expected Y position
         if (gamepad1.dpad_left) {
             expectedY -= 1.0;
-            telemetry.log().add(String.format("Expected Y: %.1f inches", expectedY));
+            System.out.println(String.format("Expected Y: %.1f inches", expectedY));
         } else if (gamepad1.dpad_right) {
             expectedY += 1.0;
-            telemetry.log().add(String.format("Expected Y: %.1f inches", expectedY));
+            System.out.println(String.format("Expected Y: %.1f inches", expectedY));
         }
 
         // Select camera (for multi-camera setups)
@@ -150,7 +151,7 @@ public class LimelightCalibrationOpMode extends LinearOpMode {
                     robot.limelightCameras[cameraIndex].getLimelight(),
                     new TelemetryAdapter()
                 );
-                telemetry.log().add("Selected camera: " + robot.limelightCameras[cameraIndex].getName());
+                System.out.println("Selected camera: " + robot.limelightCameras[cameraIndex].getName());
             }
         } else if (gamepad1.right_bumper) {
             cameraIndex = Math.min(robot.limelightCameras.length - 1, cameraIndex + 1);
@@ -159,13 +160,13 @@ public class LimelightCalibrationOpMode extends LinearOpMode {
                     robot.limelightCameras[cameraIndex].getLimelight(),
                     new TelemetryAdapter()
                 );
-                telemetry.log().add("Selected camera: " + robot.limelightCameras[cameraIndex].getName());
+                System.out.println("Selected camera: " + robot.limelightCameras[cameraIndex].getName());
             }
         }
 
         // Run calibration
         if (gamepad1.a && !gamepad1.touchpad) {  // Prevent repeated triggers
-            telemetry.log().add("Running calibration...");
+            System.out.println("Running calibration...");
             telemetry.update();
 
             LimelightCalibrator.CalibrationResult result = calibrator.calibrateMountPosition(
@@ -175,24 +176,24 @@ public class LimelightCalibrationOpMode extends LinearOpMode {
             );
 
             if (result.success) {
-                telemetry.log().add("");
-                telemetry.log().add("CALIBRATION SUCCESSFUL!");
-                telemetry.log().add("");
-                telemetry.log().add("Update Constants.java:");
-                telemetry.log().add(String.format("LIMELIGHT_MOUNT_POSITIONS[%d] = {%.2f, %.2f};",
+                System.out.println("");
+                System.out.println("CALIBRATION SUCCESSFUL!");
+                System.out.println("");
+                System.out.println("Update Constants.java:");
+                System.out.println(String.format("LIMELIGHT_MOUNT_POSITIONS[%d] = {%.2f, %.2f};",
                     cameraIndex, result.calibratedX, result.calibratedY));
-                telemetry.log().add(String.format("LIMELIGHT_ORIENTATION_OFFSETS[%d] = %.4f;  // %.1f°",
+                System.out.println(String.format("LIMELIGHT_ORIENTATION_OFFSETS[%d] = %.4f;  // %.1f°",
                     cameraIndex, result.calibratedHeading, Math.toDegrees(result.calibratedHeading)));
             } else {
-                telemetry.log().add("");
-                telemetry.log().add("CALIBRATION FAILED!");
-                telemetry.log().add("Check that AprilTag is visible");
+                System.out.println("");
+                System.out.println("CALIBRATION FAILED!");
+                System.out.println("Check that AprilTag is visible");
             }
         }
 
         // Verify accuracy
         if (gamepad1.b) {
-            telemetry.log().add("Verifying accuracy...");
+            System.out.println("Verifying accuracy...");
             telemetry.update();
 
             boolean passed = calibrator.verifyAccuracy(
@@ -204,9 +205,9 @@ public class LimelightCalibrationOpMode extends LinearOpMode {
             );
 
             if (passed) {
-                telemetry.log().add("✓ Accuracy verified within tolerance");
+                System.out.println("✓ Accuracy verified within tolerance");
             } else {
-                telemetry.log().add("✗ Accuracy outside tolerance");
+                System.out.println("✗ Accuracy outside tolerance");
             }
         }
 
@@ -238,7 +239,7 @@ public class LimelightCalibrationOpMode extends LinearOpMode {
             return new Log() {
                 @Override
                 public void add(String message) {
-                    telemetry.log().add(message);
+                    System.out.println(message);
                 }
             };
         }

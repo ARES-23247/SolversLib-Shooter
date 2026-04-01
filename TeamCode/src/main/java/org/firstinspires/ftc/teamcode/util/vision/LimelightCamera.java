@@ -2,7 +2,7 @@ package org.firstinspires.ftc.teamcode.util.vision;
 
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
-import com.qualcomm.robotcore.external.navigation.Pose3D;
+import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
@@ -123,7 +123,7 @@ public class LimelightCamera {
      */
     public void update(double maxDistance, int minTags, double healthTimeout,
                       int[] preferredTagIDs) {
-        LLResult result = limelight.getLatestResult();
+        com.qualcomm.hardware.limelightvision.LLResult result = limelight.getLatestResult();
 
         hasValidDetection = false;
         visibleTagCount = 0;
@@ -173,7 +173,7 @@ public class LimelightCamera {
 
                         // Get tag ID from the first fiducial result
                         if (!result.getFiducialResults().isEmpty()) {
-                            detectedTagID = result.getFiducialResults().get(0).getId();
+                            detectedTagID = result.getFiducialResults().get(0).getFiducialId();
                         }
 
                         // Reset health timer on valid detection
@@ -213,13 +213,13 @@ public class LimelightCamera {
         Pose3D bestPose = null;
         double bestDistance = Double.MAX_VALUE;
 
-        for (var fiducial : result.getFiducialResults()) {
-            int tagID = fiducial.getId();
+        for (com.qualcomm.hardware.limelightvision.LLResultTypes.FiducialResult fiducial : result.getFiducialResults()) {
+            int tagID = fiducial.getFiducialId();
 
             // Check if this is a preferred tag
             for (int preferredID : preferredTagIDs) {
                 if (tagID == preferredID) {
-                    Pose3D tagPose = fiducial.getRobotPose();
+                    Pose3D tagPose = fiducial.getRobotPoseTargetSpace();
                     if (tagPose != null) {
                         double distance = Math.hypot(
                             tagPose.getPosition().x * 39.3701,

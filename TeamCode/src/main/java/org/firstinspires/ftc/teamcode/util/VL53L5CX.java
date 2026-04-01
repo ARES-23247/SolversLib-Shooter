@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.util;
 
+import org.firstinspires.ftc.teamcode.hardware.SRSHub;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import java.io.IOException;
@@ -82,8 +83,8 @@ public class VL53L5CX {
     private static final int POWER_MODE_OFF = 0x0000;
     private static final int SYSTEM_MODE_RESET = 0x0000;
     private static final int SYSTEM_MODE_NORMAL = 0x0001;
-    private static final int RESOLUTION_4X4 = 0x0100;  // 4×4 zones
-    private static final int RESOLUTION_8X8 = 0x0200;  // 8×8 zones
+    private static final int RES_4X4 = 0x0100;  // 4×4 zones
+    private static final int RES_8X8 = 0x0200;  // 8×8 zones
     private static final int RANGING_MODE_CONTINUOUS = 0x0003;
     private static final int RANGING_MODE_AUTONOMOUS = 0x0002;
     private static final int START_RANGING = 0x0001;
@@ -94,13 +95,13 @@ public class VL53L5CX {
      */
     public enum Resolution {
         /** 4×4 zones (16 zones total) - faster processing, wider zones */
-        RESOLUTION_4X4(4, 16, RESOLUTION_4X4),
+        RES_4X4(4, 16, 0x0100),
         /** 8×8 zones (64 zones total) - detailed spatial awareness */
-        RESOLUTION_8X8(8, 64, RESOLUTION_8X8);
+        RES_8X8(8, 64, 0x0200);
 
-        final int width;
-        final int totalZones;
-        final int registerValue;
+        public final int width;
+        public final int totalZones;
+        public final int registerValue;
 
         Resolution(int width, int totalZones, int registerValue) {
             this.width = width;
@@ -116,10 +117,10 @@ public class VL53L5CX {
         FREQ_1HZ(1),
         FREQ_10HZ(10),
         FREQ_15HZ(15),
-        FREQ_30Hz(30),
-        FREQ_60Hz(60);
+        FREQ_30HZ(30),
+        FREQ_60HZ(60);
 
-        final int hz;
+        public final int hz;
         Frequency(int hz) {
             this.hz = hz;
         }
@@ -276,8 +277,8 @@ public class VL53L5CX {
 
     private final SRSHub hub;
     private final int i2cAddress;
-    private Resolution resolution = Resolution.RESOLUTION_8X8;
-    private Frequency frequency = Frequency.FREQ_15Hz;
+    private Resolution resolution = Resolution.RES_8X8;
+    private Frequency frequency = Frequency.FREQ_15HZ;
     private boolean initialized = false;
     private boolean ranging = false;
     private final ElapsedTime initTimer = new ElapsedTime();
@@ -308,7 +309,7 @@ public class VL53L5CX {
      * Reads a single byte from a register.
      */
     private byte readByte(int register) throws IOException {
-        byte[] data = hub.i2cRead(i2cAddress, register, 1);
+        byte[] data = hub.getDeviceClient().read(register, 1);
         return data[0];
     }
 
@@ -316,21 +317,21 @@ public class VL53L5CX {
      * Reads multiple bytes from a register.
      */
     private byte[] readBytes(int register, int length) throws IOException {
-        return hub.i2cRead(i2cAddress, register, length);
+        return hub.getDeviceClient().read(register, length);
     }
 
     /**
      * Writes a single byte to a register.
      */
     private void writeByte(int register, byte value) throws IOException {
-        hub.i2cWrite(i2cAddress, register, new byte[]{value});
+        hub.getDeviceClient().write(register, new byte[]{value});
     }
 
     /**
      * Writes multiple bytes to a register.
      */
     private void writeBytes(int register, byte[] values) throws IOException {
-        hub.i2cWrite(i2cAddress, register, values);
+        hub.getDeviceClient().write(register, values);
     }
 
     /**
@@ -408,7 +409,7 @@ public class VL53L5CX {
             Thread.sleep(2);
 
             // Set integration time (recommended: 100ms for 8×8, 50ms for 4×4)
-            int integrationTime = (resolution == Resolution.RESOLUTION_8X8) ? 100 : 50;
+            int integrationTime = (resolution == Resolution.RES_8X8) ? 100 : 50;
             writeWord(REG_INTEGRATION_TIME, integrationTime);
 
             // Set sharpener percent (default: 5)
@@ -445,7 +446,7 @@ public class VL53L5CX {
         this.resolution = resolution;
 
         // Adjust integration time for resolution
-        int integrationTime = (resolution == Resolution.RESOLUTION_8X8) ? 100 : 50;
+        int integrationTime = (resolution == Resolution.RES_8X8) ? 100 : 50;
         writeWord(REG_INTEGRATION_TIME, integrationTime);
 
         startRanging();

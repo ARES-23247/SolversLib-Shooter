@@ -2,7 +2,7 @@ package org.firstinspires.ftc.teamcode.util.vision;
 
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
-import com.qualcomm.robotcore.external.navigation.Pose3D;
+import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
@@ -60,9 +60,9 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
  * );
  *
  * if (result.success) {
- *     telemetry.log().add("Camera is mounted at:");
- *     telemetry.log().add(String.format("  X offset: %.2f inches", result.calibratedX));
- *     telemetry.log().add(String.format("  Y offset: %.2f inches", result.calibratedY));
+ *     System.out.println("Camera is mounted at:");
+ *     System.out.println(String.format("  X offset: %.2f inches", result.calibratedX));
+ *     System.out.println(String.format("  Y offset: %.2f inches", result.calibratedY));
  * }
  * }</pre>
  *
@@ -206,43 +206,43 @@ public class LimelightCalibrator {
          */
         public void printReport() {
             if (!success) {
-                telemetry.log().add("Calibration FAILED");
+                System.out.println("Calibration FAILED");
                 return;
             }
 
-            telemetry.log().add("===========================================");
-            telemetry.log().add("   LIMELIGHT CALIBRATION RESULTS");
-            telemetry.log().add("===========================================");
-            telemetry.log().add("");
-            telemetry.log().add("EXPECTED POSITION (Robot Placement):");
-            telemetry.log().add(String.format("  X: %.2f inches", expectedX));
-            telemetry.log().add(String.format("  Y: %.2f inches", expectedY));
-            telemetry.log().add(String.format("  Heading: %.1f°", Math.toDegrees(expectedHeading)));
-            telemetry.log().add("");
-            telemetry.log().add("MEASURED POSITION (Limelight):");
-            telemetry.log().add(String.format("  X: %.2f inches", measuredX));
-            telemetry.log().add(String.format("  Y: %.2f inches", measuredY));
-            telemetry.log().add(String.format("  Heading: %.1f°", Math.toDegrees(measuredHeading)));
-            telemetry.log().add("");
-            telemetry.log().add("CALIBRATED OFFSETS:");
-            telemetry.log().add(String.format("  X Offset: %.2f inches", calibratedX));
-            telemetry.log().add(String.format("  Y Offset: %.2f inches", calibratedY));
-            telemetry.log().add(String.format("  Heading Offset: %.2f° (%.4f rad)",
+            System.out.println("===========================================");
+            System.out.println("   LIMELIGHT CALIBRATION RESULTS");
+            System.out.println("===========================================");
+            System.out.println("");
+            System.out.println("EXPECTED POSITION (Robot Placement):");
+            System.out.println(String.format("  X: %.2f inches", expectedX));
+            System.out.println(String.format("  Y: %.2f inches", expectedY));
+            System.out.println(String.format("  Heading: %.1f°", Math.toDegrees(expectedHeading)));
+            System.out.println("");
+            System.out.println("MEASURED POSITION (Limelight):");
+            System.out.println(String.format("  X: %.2f inches", measuredX));
+            System.out.println(String.format("  Y: %.2f inches", measuredY));
+            System.out.println(String.format("  Heading: %.1f°", Math.toDegrees(measuredHeading)));
+            System.out.println("");
+            System.out.println("CALIBRATED OFFSETS:");
+            System.out.println(String.format("  X Offset: %.2f inches", calibratedX));
+            System.out.println(String.format("  Y Offset: %.2f inches", calibratedY));
+            System.out.println(String.format("  Heading Offset: %.2f° (%.4f rad)",
                 Math.toDegrees(calibratedHeading), calibratedHeading));
-            telemetry.log().add("");
-            telemetry.log().add("SUMMARY: " + getCalibrationSummary());
-            telemetry.log().add("");
-            telemetry.log().add("DETECTION DETAILS:");
-            telemetry.log().add(String.format("  Tag ID: %d", tagID));
-            telemetry.log().add(String.format("  Tags Visible: %d", tagCount));
-            telemetry.log().add(String.format("  Distance: %.1f inches", distance));
-            telemetry.log().add("");
-            telemetry.log().add("UPDATE Constants.java WITH:");
-            telemetry.log().add(String.format("  LIMELIGHT_MOUNT_POSITIONS[0] = {%.2f, %.2f};",
+            System.out.println("");
+            System.out.println("SUMMARY: " + getCalibrationSummary());
+            System.out.println("");
+            System.out.println("DETECTION DETAILS:");
+            System.out.println(String.format("  Tag ID: %d", tagID));
+            System.out.println(String.format("  Tags Visible: %d", tagCount));
+            System.out.println(String.format("  Distance: %.1f inches", distance));
+            System.out.println("");
+            System.out.println("UPDATE Constants.java WITH:");
+            System.out.println(String.format("  LIMELIGHT_MOUNT_POSITIONS[0] = {%.2f, %.2f};",
                 calibratedX, calibratedY));
-            telemetry.log().add(String.format("  LIMELIGHT_ORIENTATION_OFFSETS[0] = %.4f;  // %.1f°",
+            System.out.println(String.format("  LIMELIGHT_ORIENTATION_OFFSETS[0] = %.4f;  // %.1f°",
                 calibratedHeading, Math.toDegrees(calibratedHeading)));
-            telemetry.log().add("===========================================");
+            System.out.println("===========================================");
         }
     }
 
@@ -280,22 +280,22 @@ public class LimelightCalibrator {
      * @return calibration result with offsets
      */
     public CalibrationResult calibrateMountPosition(double expectedX, double expectedY, double expectedHeading) {
-        telemetry.log().add("===========================================");
-        telemetry.log().add("   LIMELIGHT CALIBRATION STARTING");
-        telemetry.log().add("===========================================");
-        telemetry.log().add("");
-        telemetry.log().add("SETUP INSTRUCTIONS:");
-        telemetry.log().add("1. Place robot center at exact position:");
-        telemetry.log().add(String.format("   X: %.1f inches (forward+)", expectedX));
-        telemetry.log().add(String.format("   Y: %.1f inches (left+)", expectedY));
-        telemetry.log().add(String.format("   Heading: %.1f° (facing tag)", Math.toDegrees(expectedHeading)));
-        telemetry.log().add("");
-        telemetry.log().add("2. Robot must be stationary");
-        telemetry.log().add("");
-        telemetry.log().add("Reading camera values...");
+        System.out.println("===========================================");
+        System.out.println("   LIMELIGHT CALIBRATION STARTING");
+        System.out.println("===========================================");
+        System.out.println("");
+        System.out.println("SETUP INSTRUCTIONS:");
+        System.out.println("1. Place robot center at exact position:");
+        System.out.println(String.format("   X: %.1f inches (forward+)", expectedX));
+        System.out.println(String.format("   Y: %.1f inches (left+)", expectedY));
+        System.out.println(String.format("   Heading: %.1f° (facing tag)", Math.toDegrees(expectedHeading)));
+        System.out.println("");
+        System.out.println("2. Robot must be stationary");
+        System.out.println("");
+        System.out.println("Reading camera values...");
 
         // Read from Limelight
-        LLResult result = limelight.getLatestResult();
+        com.qualcomm.hardware.limelightvision.LLResult result = limelight.getLatestResult();
         CalibrationResult calibrationResult = new CalibrationResult();
 
         if (result != null && result.isValid()) {
@@ -308,13 +308,13 @@ public class LimelightCalibrator {
                     double measuredY = botpose.getPosition().y * 39.3701;
                     double measuredHeading = botpose.getOrientation().getYaw(AngleUnit.RADIANS);
 
-                    int tagID = result.getFiducialResults().get(0).getId();
+                    int tagID = result.getFiducialResults().get(0).getFiducialId();
                     int tagCount = result.getFiducialResults().size();
                     double distance = Math.hypot(measuredX, measuredY);
 
-                    telemetry.log().add(String.format("Measured: X=%.1f\", Y=%.1f\", Heading=%.1f°",
+                    System.out.println(String.format("Measured: X=%.1f\", Y=%.1f\", Heading=%.1f°",
                         measuredX, measuredY, Math.toDegrees(measuredHeading)));
-                    telemetry.log().add(String.format("Tag #%d visible, %d total tags, %.1f\" away",
+                    System.out.println(String.format("Tag #%d visible, %d total tags, %.1f\" away",
                         tagID, tagCount, distance));
 
                     calibrationResult = new CalibrationResult(
@@ -329,13 +329,13 @@ public class LimelightCalibrator {
             }
         }
 
-        telemetry.log().add("");
-        telemetry.log().add("CALIBRATION FAILED!");
-        telemetry.log().add("No AprilTag detected. Check:");
-        telemetry.log().add("  - Camera is connected and polling");
-        telemetry.log().add("  - AprilTag is in view");
-        telemetry.log().add("  - Pipeline is set to AprilTag (pipeline 0)");
-        telemetry.log().add("===========================================");
+        System.out.println("");
+        System.out.println("CALIBRATION FAILED!");
+        System.out.println("No AprilTag detected. Check:");
+        System.out.println("  - Camera is connected and polling");
+        System.out.println("  - AprilTag is in view");
+        System.out.println("  - Pipeline is set to AprilTag (pipeline 0)");
+        System.out.println("===========================================");
 
         return calibrationResult;
     }
@@ -353,12 +353,12 @@ public class LimelightCalibrator {
      */
     public boolean verifyAccuracy(double expectedX, double expectedY, double expectedHeading,
                                  double positionTolerance, double headingTolerance) {
-        telemetry.log().add("===========================================");
-        telemetry.log().add("   LIMELIGHT ACCURACY VERIFICATION");
-        telemetry.log().add("===========================================");
-        telemetry.log().add("");
+        System.out.println("===========================================");
+        System.out.println("   LIMELIGHT ACCURACY VERIFICATION");
+        System.out.println("===========================================");
+        System.out.println("");
 
-        LLResult result = limelight.getLatestResult();
+        com.qualcomm.hardware.limelightvision.LLResult result = limelight.getLatestResult();
 
         if (result != null && result.isValid() &&
             result.getFiducialResults() != null && !result.getFiducialResults().isEmpty()) {
@@ -377,35 +377,35 @@ public class LimelightCalibrator {
                 while (errorHeading > Math.PI) errorHeading -= 2 * Math.PI;
                 while (errorHeading < -Math.PI) errorHeading += 2 * Math.PI;
 
-                telemetry.log().add(String.format("Expected: X=%.1f\", Y=%.1f\", H=%.1f°",
+                System.out.println(String.format("Expected: X=%.1f\", Y=%.1f\", H=%.1f°",
                     expectedX, expectedY, Math.toDegrees(expectedHeading)));
-                telemetry.log().add(String.format("Measured: X=%.1f\", Y=%.1f\", H=%.1f°",
+                System.out.println(String.format("Measured: X=%.1f\", Y=%.1f\", H=%.1f°",
                     measuredX, measuredY, Math.toDegrees(measuredHeading)));
-                telemetry.log().add("");
-                telemetry.log().add(String.format("Errors: X=%.2f\", Y=%.2f\", H=%.2f°",
+                System.out.println("");
+                System.out.println(String.format("Errors: X=%.2f\", Y=%.2f\", H=%.2f°",
                     errorX, errorY, Math.toDegrees(errorHeading)));
-                telemetry.log().add("");
-                telemetry.log().add(String.format("Tolerances: X=%.2f\", Y=%.2f\", H=%.2f°",
+                System.out.println("");
+                System.out.println(String.format("Tolerances: X=%.2f\", Y=%.2f\", H=%.2f°",
                     positionTolerance, positionTolerance, Math.toDegrees(headingTolerance)));
-                telemetry.log().add("");
+                System.out.println("");
 
                 boolean positionOK = (errorX <= positionTolerance && errorY <= positionTolerance);
                 boolean headingOK = (errorHeading <= headingTolerance);
 
                 if (positionOK && headingOK) {
-                    telemetry.log().add("✓ ACCURACY VERIFIED - Within tolerance!");
+                    System.out.println("✓ ACCURACY VERIFIED - Within tolerance!");
                     return true;
                 } else {
-                    telemetry.log().add("✗ ACCURACY FAILED - Outside tolerance!");
-                    if (!positionOK) telemetry.log().add("  Position error too large");
-                    if (!headingOK) telemetry.log().add("  Heading error too large");
+                    System.out.println("✗ ACCURACY FAILED - Outside tolerance!");
+                    if (!positionOK) System.out.println("  Position error too large");
+                    if (!headingOK) System.out.println("  Heading error too large");
                     return false;
                 }
             }
         }
 
-        telemetry.log().add("✗ VERIFICATION FAILED - No tag detected");
-        telemetry.log().add("===========================================");
+        System.out.println("✗ VERIFICATION FAILED - No tag detected");
+        System.out.println("===========================================");
         return false;
     }
 
@@ -415,39 +415,39 @@ public class LimelightCalibrator {
      * <p>Useful for checking which tags the camera can see.</p>
      */
     public void scanForTags() {
-        telemetry.log().add("===========================================");
-        telemetry.log().add("   LIMELIGHT TAG SCAN");
-        telemetry.log().add("===========================================");
-        telemetry.log().add("");
+        System.out.println("===========================================");
+        System.out.println("   LIMELIGHT TAG SCAN");
+        System.out.println("===========================================");
+        System.out.println("");
 
-        LLResult result = limelight.getLatestResult();
+        com.qualcomm.hardware.limelightvision.LLResult result = limelight.getLatestResult();
 
         if (result != null && result.isValid()) {
             if (result.getFiducialResults() != null && !result.getFiducialResults().isEmpty()) {
-                telemetry.log().add(String.format("Tags visible: %d", result.getFiducialResults().size()));
-                telemetry.log().add("");
+                System.out.println(String.format("Tags visible: %d", result.getFiducialResults().size()));
+                System.out.println("");
 
-                for (var fiducial : result.getFiducialResults()) {
-                    int id = fiducial.getId();
-                    Pose3D pose = fiducial.getRobotPose();
+                for (com.qualcomm.hardware.limelightvision.LLResultTypes.FiducialResult fiducial : result.getFiducialResults()) {
+                    int id = fiducial.getFiducialId();
+                    Pose3D pose = fiducial.getRobotPoseTargetSpace();
 
                     if (pose != null) {
                         double x = pose.getPosition().x * 39.3701;
                         double y = pose.getPosition().y * 39.3701;
                         double heading = pose.getOrientation().getYaw(AngleUnit.RADIANS);
 
-                        telemetry.log().add(String.format("Tag #%d: X=%.1f\", Y=%.1f\", H=%.1f°",
+                        System.out.println(String.format("Tag #%d: X=%.1f\", Y=%.1f\", H=%.1f°",
                             id, x, y, Math.toDegrees(heading)));
                     }
                 }
             } else {
-                telemetry.log().add("No tags visible");
+                System.out.println("No tags visible");
             }
         } else {
-            telemetry.log().add("Limelight not returning valid results");
+            System.out.println("Limelight not returning valid results");
         }
 
-        telemetry.log().add("===========================================");
+        System.out.println("===========================================");
     }
 
     /**

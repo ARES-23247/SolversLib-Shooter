@@ -57,26 +57,26 @@ public class ObjectDetectionSample extends LinearOpMode {
 
     @Override
     public void runOpMode() throws InterruptedException {
-        telemetry = new TelemetryData(super.telemetry);
+        TelemetryData logger = new TelemetryData(super.telemetry);
 
-        telemetry.addData("Status", "Initializing Limelight Detection...");
-        telemetry.update();
+        logger.addData("Status", "Initializing Limelight Detection...");
+        logger.update();
 
         robot = Robot.getInstance();
         robot.init(hardwareMap);
-        robot.telemetry = telemetry;
+        robot.telemetry = logger;
 
         // Set Limelight to color detection pipeline (pipeline 1)
         robot.limelight.pipelineSwitch(1);
         robot.limelight.start();
         currentPipeline = 1;
 
-        telemetry.addData("Status", "Ready!");
-        telemetry.addData("Pipeline", "Color Detection");
-        telemetry.addData("");
-        telemetry.addData("Instructions", "Point camera at game piece");
-        telemetry.addData("Controls", "A: Align | B: AprilTag | X: Color | Y: Calibrate");
-        telemetry.update();
+        logger.addData("Status", "Ready!");
+        logger.addData("Pipeline", "Color Detection");
+        logger.addData("", "");
+        logger.addData("Instructions", "Point camera at game piece");
+        logger.addData("Controls", "A: Align | B: AprilTag | X: Color | Y: Calibrate");
+        logger.update();
 
         waitForStart();
 
@@ -119,7 +119,7 @@ public class ObjectDetectionSample extends LinearOpMode {
                 strafe = Math.max(-MAX_STRAFE, Math.min(MAX_STRAFE, strafe));
 
                 robot.drive.setTeleOpDrive(0, strafe, 0, true);
-                telemetry.addData("Mode", "AUTO-ALIGN");
+                logger.addData("Mode", "AUTO-ALIGN");
             } else {
                 // Manual drive
                 double forward = -gamepad1.left_stick_y;
@@ -127,43 +127,43 @@ public class ObjectDetectionSample extends LinearOpMode {
                 double turn = gamepad1.right_stick_x;
 
                 robot.drive.setTeleOpDrive(forward, lateral, turn, true);
-                telemetry.addData("Mode", autoAlign ? "SEARCHING" : "MANUAL");
+                logger.addData("Mode", autoAlign ? "SEARCHING" : "MANUAL");
             }
 
             // Telemetry
-            telemetry.addData("Pipeline", currentPipeline == 0 ? "AprilTag" : "Color");
-            telemetry.addData("Detected", detected ? "YES" : "NO");
+            logger.addData("Pipeline", currentPipeline == 0 ? "AprilTag" : "Color");
+            logger.addData("Detected", detected ? "YES" : "NO");
 
             if (detected) {
-                telemetry.addData("Horizontal Offset", String.format("%.2f°", tx));
-                telemetry.addData("Vertical Offset", String.format("%.2f°", ty));
-                telemetry.addData("Target Area", String.format("%.2f%%", ta));
-                telemetry.addData("Estimated Distance", String.format("%.1f in", estimateDistance()));
+                logger.addData("Horizontal Offset", String.format("%.2f°", tx));
+                logger.addData("Vertical Offset", String.format("%.2f°", ty));
+                logger.addData("Target Area", String.format("%.2f%%", ta));
+                logger.addData("Estimated Distance", String.format("%.1f in", estimateDistance()));
 
                 // Alignment status
                 if (Math.abs(tx) < 1.0) {
-                    telemetry.addData("Alignment", "✓ ALIGNED");
+                    logger.addData("Alignment", "✓ ALIGNED");
                 } else {
                     String direction = tx > 0 ? "← LEFT" : "→ RIGHT";
-                    telemetry.addData("Alignment", direction);
+                    logger.addData("Alignment", direction);
                 }
 
                 // Distance guidance
                 if (ta > 15.0) {
-                    telemetry.addData("Action", "BACK UP - TOO CLOSE");
+                    logger.addData("Action", "BACK UP - TOO CLOSE");
                 } else if (ta < 2.0) {
-                    telemetry.addData("Action", "MOVE FORWARD - TOO FAR");
+                    logger.addData("Action", "MOVE FORWARD - TOO FAR");
                 } else {
-                    telemetry.addData("Action", "GOOD DISTANCE");
+                    logger.addData("Action", "GOOD DISTANCE");
                 }
             }
 
-            telemetry.addLine();
-            telemetry.addData("Controls", "A: Align | B: AprilTag | X: Color | Y: Calibrate");
+            logger.addData("","");
+            logger.addData("Controls", "A: Align | B: AprilTag | X: Color | Y: Calibrate");
 
-            telemetry.update();
+            logger.update();
 
-            robot.updateLoop(telemetry);
+            robot.updateLoop(logger);
         }
 
         // Cleanup
@@ -174,7 +174,7 @@ public class ObjectDetectionSample extends LinearOpMode {
      * Checks if a target is detected.
      */
     private boolean isTargetDetected() {
-        var result = robot.limelight.getRawResult();
+        com.qualcomm.hardware.limelightvision.LLResult result = robot.limelight.getLatestResult();
         return result != null && result.isValid();
     }
 
@@ -183,8 +183,8 @@ public class ObjectDetectionSample extends LinearOpMode {
      * @return Degrees (negative = left of center, positive = right of center)
      */
     private double getHorizontalOffset() {
-        var result = robot.limelight.getRawResult();
-        return result != null ? result.tx : 0.0;
+        com.qualcomm.hardware.limelightvision.LLResult result = robot.limelight.getLatestResult();
+        return result != null ? result.getTx() : 0.0;
     }
 
     /**
@@ -192,8 +192,8 @@ public class ObjectDetectionSample extends LinearOpMode {
      * @return Degrees (negative = above center, positive = below center)
      */
     private double getVerticalOffset() {
-        var result = robot.limelight.getRawResult();
-        return result != null ? result.ty : 0.0;
+        com.qualcomm.hardware.limelightvision.LLResult result = robot.limelight.getLatestResult();
+        return result != null ? result.getTy() : 0.0;
     }
 
     /**
@@ -201,8 +201,8 @@ public class ObjectDetectionSample extends LinearOpMode {
      * Larger values = closer target.
      */
     private double getTargetArea() {
-        var result = robot.limelight.getRawResult();
-        return result != null ? result.ta : 0.0;
+        com.qualcomm.hardware.limelightvision.LLResult result = robot.limelight.getLatestResult();
+        return result != null ? result.getTa() : 0.0;
     }
 
     /**
@@ -237,20 +237,20 @@ public class ObjectDetectionSample extends LinearOpMode {
     private void printCalibrationData() {
         boolean detected = isTargetDetected();
 
-        telemetry.log().add("=== Limelight Calibration Data ===");
-        telemetry.log().add("Detected: " + (detected ? "YES" : "NO"));
+        System.out.println("=== Limelight Calibration Data ===");
+        System.out.println("Detected: " + (detected ? "YES" : "NO"));
 
         if (detected) {
-            telemetry.log().add(String.format("tx (horizontal): %.2f°", getHorizontalOffset()));
-            telemetry.log().add(String.format("ty (vertical): %.2f°", getVerticalOffset()));
-            telemetry.log().add(String.format("ta (area): %.2f%%", getTargetArea()));
-            telemetry.log().add(String.format("Estimated distance: %.1f in", estimateDistance()));
-            telemetry.log().add("");
-            telemetry.log().add("Record this data at known distances!");
-            telemetry.log().add("Example: Place object at 24in, press Y");
-            telemetry.log().add("Then fit formula: distance = A / tan(ty + B)");
+            System.out.println(String.format("tx (horizontal): %.2f°", getHorizontalOffset()));
+            System.out.println(String.format("ty (vertical): %.2f°", getVerticalOffset()));
+            System.out.println(String.format("ta (area): %.2f%%", getTargetArea()));
+            System.out.println(String.format("Estimated distance: %.1f in", estimateDistance()));
+            System.out.println("");
+            System.out.println("Record this data at known distances!");
+            System.out.println("Example: Place object at 24in, press Y");
+            System.out.println("Then fit formula: distance = A / tan(ty + B)");
         }
 
-        telemetry.log().add("====================================");
+        System.out.println("====================================");
     }
 }

@@ -6,7 +6,7 @@ import org.firstinspires.ftc.teamcode.globals.Robot;
 
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.firstinspires.ftc.robotcore.external.Telemetry;
+import com.seattlesolvers.solverslib.util.TelemetryData;
 
 import static org.firstinspires.ftc.teamcode.globals.Constants.*;
 
@@ -71,7 +71,7 @@ import static org.firstinspires.ftc.teamcode.globals.Constants.*;
 public class SteeringTuner {
 
     private final Drive drive;
-    private final Telemetry telemetry;
+    private final TelemetryData telemetry;
     private final ElapsedTime timer;
 
     // Module names for telemetry
@@ -222,30 +222,30 @@ public class SteeringTuner {
     public double[] tuneAllModules() {
         timer.reset();
 
-        telemetry.log().add("===========================================");
-        telemetry.log().add("   STEERING AUTOTUNER STARTING");
-        telemetry.log().add("===========================================");
-        telemetry.log().add("");
-        telemetry.log().add("This will tune steering PID for all 4 modules");
-        telemetry.log().add("");
-        telemetry.log().add("SAFETY SYSTEMS ACTIVE:");
-        telemetry.log().add("  ✓ Time limit: 120 seconds maximum");
-        telemetry.log().add("  ✓ Emergency stop: Driver can STOP anytime");
-        telemetry.log().add("");
-        telemetry.log().add("ROBOT SETUP:");
-        telemetry.log().add("  ✓ Robot can be on blocks OR field floor");
-        telemetry.log().add("  ✓ Clear area around robot");
-        telemetry.log().add("  ✓ Wheels will rotate in place");
-        telemetry.log().add("");
-        telemetry.log().add("Starting in 5 seconds...");
+        System.out.println("===========================================");
+        System.out.println("   STEERING AUTOTUNER STARTING");
+        System.out.println("===========================================");
+        System.out.println("");
+        System.out.println("This will tune steering PID for all 4 modules");
+        System.out.println("");
+        System.out.println("SAFETY SYSTEMS ACTIVE:");
+        System.out.println("  ✓ Time limit: 120 seconds maximum");
+        System.out.println("  ✓ Emergency stop: Driver can STOP anytime");
+        System.out.println("");
+        System.out.println("ROBOT SETUP:");
+        System.out.println("  ✓ Robot can be on blocks OR field floor");
+        System.out.println("  ✓ Clear area around robot");
+        System.out.println("  ✓ Wheels will rotate in place");
+        System.out.println("");
+        System.out.println("Starting in 5 seconds...");
 
         // Safety countdown
         for (int i = 5; i > 0; i--) {
-            telemetry.log().add(String.format("  %d...", i));
+            System.out.println(String.format("  %d...", i));
             sleep(1000);
 
             if (isStopRequested()) {
-                telemetry.log().add("  EMERGENCY STOP - Tuning cancelled!");
+                System.out.println("  EMERGENCY STOP - Tuning cancelled!");
                 drive.swerve.stop();
                 return new double[]{0.0, 0.0, 0.0, 0.0};
             }
@@ -261,16 +261,16 @@ public class SteeringTuner {
         // Tune each module
         for (int moduleIndex = 0; moduleIndex < 4; moduleIndex++) {
             if (isStopRequested()) {
-                telemetry.log().add("");
-                telemetry.log().add("EMERGENCY STOP - Tuning cancelled!");
+                System.out.println("");
+                System.out.println("EMERGENCY STOP - Tuning cancelled!");
                 drive.swerve.stop();
                 return new double[]{0.0, 0.0, 0.0, 0.0, 0.0};
             }
 
-            telemetry.log().add("");
-            telemetry.log().add("===========================================");
-            telemetry.log().add("TUNING MODULE: " + MODULE_NAMES[moduleIndex]);
-            telemetry.log().add("===========================================");
+            System.out.println("");
+            System.out.println("===========================================");
+            System.out.println("TUNING MODULE: " + MODULE_NAMES[moduleIndex]);
+            System.out.println("===========================================");
 
             double[] moduleResults = tuneSingleModule(moduleIndex);
 
@@ -295,27 +295,27 @@ public class SteeringTuner {
         // Report results
         drive.swerve.stop();
 
-        telemetry.log().add("");
-        telemetry.log().add("===========================================");
-        telemetry.log().add("   TUNING COMPLETE!");
-        telemetry.log().add("===========================================");
-        telemetry.log().add("");
-        telemetry.log().add("RESULTS (averaged across all modules):");
-        telemetry.log().add("");
-        telemetry.log().add(String.format("P Gain (Response):     %.4f", foundP));
-        telemetry.log().add(String.format("I Gain (Integral):     %.4f", foundI));
-        telemetry.log().add(String.format("D Gain (Damping):      %.4f", foundD));
-        telemetry.log().add(String.format("kS (Static Friction): %.4f", foundKS));
-        telemetry.log().add(String.format("Max Velocity:         %.2f rad/s", foundMaxVelocity));
-        telemetry.log().add("");
-        telemetry.log().add("UPDATE Constants.java:");
-        telemetry.log().add(String.format("  SWERVE_SERVO_PIDF.p = %.4f;", foundP));
-        telemetry.log().add(String.format("  SWERVE_SERVO_PIDF.i = %.4f;", foundI));
-        telemetry.log().add(String.format("  SWERVE_SERVO_PIDF.d = %.4f;", foundD));
-        telemetry.log().add(String.format("  STEERING_KS = %.4f;", foundKS));
-        telemetry.log().add(String.format("  MAX_STEERING_VELOCITY = %.2f;", foundMaxVelocity));
-        telemetry.log().add("");
-        telemetry.log().add("Then restart robot to apply!");
+        System.out.println("");
+        System.out.println("===========================================");
+        System.out.println("   TUNING COMPLETE!");
+        System.out.println("===========================================");
+        System.out.println("");
+        System.out.println("RESULTS (averaged across all modules):");
+        System.out.println("");
+        System.out.println(String.format("P Gain (Response):     %.4f", foundP));
+        System.out.println(String.format("I Gain (Integral):     %.4f", foundI));
+        System.out.println(String.format("D Gain (Damping):      %.4f", foundD));
+        System.out.println(String.format("kS (Static Friction): %.4f", foundKS));
+        System.out.println(String.format("Max Velocity:         %.2f rad/s", foundMaxVelocity));
+        System.out.println("");
+        System.out.println("UPDATE Constants.java:");
+        System.out.println(String.format("  SWERVE_SERVO_PIDF.p = %.4f;", foundP));
+        System.out.println(String.format("  SWERVE_SERVO_PIDF.i = %.4f;", foundI));
+        System.out.println(String.format("  SWERVE_SERVO_PIDF.d = %.4f;", foundD));
+        System.out.println(String.format("  STEERING_KS = %.4f;", foundKS));
+        System.out.println(String.format("  MAX_STEERING_VELOCITY = %.2f;", foundMaxVelocity));
+        System.out.println("");
+        System.out.println("Then restart robot to apply!");
 
         return new double[]{foundP, foundI, foundD, foundKS, foundMaxVelocity};
     }
@@ -345,16 +345,16 @@ public class SteeringTuner {
      * @return max velocity in rad/s
      */
     private double measureMaxVelocity(int moduleIndex) {
-        telemetry.log().add("");
-        telemetry.log().add("STEP 1: MEASURING MAX VELOCITY");
-        telemetry.log().add("----------------------------------------");
+        System.out.println("");
+        System.out.println("STEP 1: MEASURING MAX VELOCITY");
+        System.out.println("----------------------------------------");
 
         OctoSwerveModuleV2 module = getModule(moduleIndex);
         double startAngle = module.getModuleHeadingRadians();
         double targetAngle = startAngle + VELOCITY_TEST_ANGLE;
 
         // Set target angle
-        drive.swerve.update();
+        drive.swerve.drive(new com.seattlesolvers.solverslib.kinematics.wpilibkinematics.ChassisSpeeds());
         sleep(50);
 
         timer.reset();
@@ -368,7 +368,7 @@ public class SteeringTuner {
                 return maxVel;
             }
 
-            drive.swerve.update();
+            drive.swerve.drive(new com.seattlesolvers.solverslib.kinematics.wpilibkinematics.ChassisSpeeds());
             sleep(20);
 
             currentAngle = module.getModuleHeadingRadians();
@@ -385,9 +385,9 @@ public class SteeringTuner {
             }
         }
 
-        telemetry.log().add(String.format("  Moved %.1f° in %.2f seconds",
+        System.out.println(String.format("  Moved %.1f° in %.2f seconds",
             Math.toDegrees(angleMoved), timer.seconds()));
-        telemetry.log().add(String.format("  Max Velocity: %.2f rad/s (%.0f °/s)",
+        System.out.println(String.format("  Max Velocity: %.2f rad/s (%.0f °/s)",
             maxVel, Math.toDegrees(maxVel)));
 
         return maxVel;
@@ -402,9 +402,9 @@ public class SteeringTuner {
      * @return optimal P gain
      */
     private double tunePGain(int moduleIndex) {
-        telemetry.log().add("");
-        telemetry.log().add("STEP 3: TUNING P GAIN");
-        telemetry.log().add("----------------------------------------");
+        System.out.println("");
+        System.out.println("STEP 3: TUNING P GAIN");
+        System.out.println("----------------------------------------");
 
         double p = P_START;
         double lastOvershoot = 0.0;
@@ -415,22 +415,22 @@ public class SteeringTuner {
                 return P_START;
             }
 
-            telemetry.log().add(String.format("  Testing P=%.3f...", p));
+            System.out.println(String.format("  Testing P=%.3f...", p));
 
             // Apply new P gain temporarily (this would require updating the module's PID)
             // For now, we'll simulate by measuring response characteristics
             double overshoot = measureStepResponse(moduleIndex, p, 0.0, 0.0);
 
             if (overshoot > OVERSHOOT_THRESHOLD) {
-                telemetry.log().add(String.format("    → Oscillation detected! (%.3f overshoot)", overshoot));
+                System.out.println(String.format("    → Oscillation detected! (%.3f overshoot)", overshoot));
                 oscillationDetected = true;
 
                 // Back off 20% for stability
                 p = p * 0.8;
-                telemetry.log().add(String.format("    → Backing off to P=%.3f", p));
+                System.out.println(String.format("    → Backing off to P=%.3f", p));
                 break;
             } else {
-                telemetry.log().add(String.format("    → Stable (%.3f overshoot)", overshoot));
+                System.out.println(String.format("    → Stable (%.3f overshoot)", overshoot));
                 lastOvershoot = overshoot;
                 p += P_INCREMENT;
             }
@@ -438,7 +438,7 @@ public class SteeringTuner {
             sleep(500);
         }
 
-        telemetry.log().add(String.format("  ✓ P FOUND: %.4f", p));
+        System.out.println(String.format("  ✓ P FOUND: %.4f", p));
         return p;
     }
 
@@ -452,9 +452,9 @@ public class SteeringTuner {
      * @return optimal I gain
      */
     private double tuneIGain(int moduleIndex, double pGain) {
-        telemetry.log().add("");
-        telemetry.log().add("STEP 3: TUNING I GAIN");
-        telemetry.log().add("----------------------------------------");
+        System.out.println("");
+        System.out.println("STEP 3: TUNING I GAIN");
+        System.out.println("----------------------------------------");
 
         double i = I_START;
         double bestI = 0.0;
@@ -465,20 +465,20 @@ public class SteeringTuner {
                 return bestI;
             }
 
-            telemetry.log().add(String.format("  Testing I=%.4f...", i));
+            System.out.println(String.format("  Testing I=%.4f...", i));
 
             double steadyStateError = measureSteadyStateError(moduleIndex, pGain, i);
 
             if (steadyStateError < STEADY_STATE_ERROR_THRESHOLD) {
-                telemetry.log().add(String.format("    → Error eliminated! (%.3f error)", steadyStateError));
+                System.out.println(String.format("    → Error eliminated! (%.3f error)", steadyStateError));
                 bestI = i;
                 break;
             } else if (steadyStateError < bestError) {
                 bestError = steadyStateError;
                 bestI = i;
-                telemetry.log().add(String.format("    → Better (%.3f error)", steadyStateError));
+                System.out.println(String.format("    → Better (%.3f error)", steadyStateError));
             } else {
-                telemetry.log().add(String.format("    → No improvement (%.3f error)", steadyStateError));
+                System.out.println(String.format("    → No improvement (%.3f error)", steadyStateError));
             }
 
             i += I_INCREMENT;
@@ -491,7 +491,7 @@ public class SteeringTuner {
             sleep(300);
         }
 
-        telemetry.log().add(String.format("  ✓ I FOUND: %.4f", bestI));
+        System.out.println(String.format("  ✓ I FOUND: %.4f", bestI));
         return bestI;
     }
 
@@ -524,9 +524,9 @@ public class SteeringTuner {
      * @return optimal D gain
      */
     private double tuneDGain(int moduleIndex, double pGain, double iGain) {
-        telemetry.log().add("");
-        telemetry.log().add("STEP 4: TUNING D GAIN");
-        telemetry.log().add("----------------------------------------");
+        System.out.println("");
+        System.out.println("STEP 4: TUNING D GAIN");
+        System.out.println("----------------------------------------");
 
         double d = D_START;
         double bestD = 0.0;
@@ -537,16 +537,16 @@ public class SteeringTuner {
                 return bestD;
             }
 
-            telemetry.log().add(String.format("  Testing D=%.3f...", d));
+            System.out.println(String.format("  Testing D=%.3f...", d));
 
             double overshoot = measureStepResponse(moduleIndex, pGain, iGain, d);
 
             if (overshoot < bestOvershoot) {
                 bestOvershoot = overshoot;
                 bestD = d;
-                telemetry.log().add(String.format("    → Better (%.3f overshoot)", overshoot));
+                System.out.println(String.format("    → Better (%.3f overshoot)", overshoot));
             } else {
-                telemetry.log().add(String.format("    → Worse (%.3f overshoot)", overshoot));
+                System.out.println(String.format("    → Worse (%.3f overshoot)", overshoot));
             }
 
             d += D_INCREMENT;
@@ -559,7 +559,7 @@ public class SteeringTuner {
             sleep(200);
         }
 
-        telemetry.log().add(String.format("  ✓ D FOUND: %.4f", bestD));
+        System.out.println(String.format("  ✓ D FOUND: %.4f", bestD));
         return bestD;
     }
 
@@ -591,10 +591,10 @@ public class SteeringTuner {
      * @return kS value
      */
     private double tuneKS(int moduleIndex) {
-        telemetry.log().add("");
-        telemetry.log().add("STEP 2: TUNING kS (Static Friction)");
-        telemetry.log().add("----------------------------------------");
-        telemetry.log().add("  Ramping power until steering moves...");
+        System.out.println("");
+        System.out.println("STEP 2: TUNING kS (Static Friction)");
+        System.out.println("----------------------------------------");
+        System.out.println("  Ramping power until steering moves...");
 
         double power = 0.0;
         double lastVelocity = 0.0;
@@ -613,7 +613,7 @@ public class SteeringTuner {
             double velocity = 0.0;  // Placeholder
 
             if (velocity > KS_VELOCITY_THRESHOLD && velocity > lastVelocity * 1.5) {
-                telemetry.log().add(String.format("  ✓ kS FOUND: %.4f", power));
+                System.out.println(String.format("  ✓ kS FOUND: %.4f", power));
                 return power;
             }
 
@@ -622,7 +622,7 @@ public class SteeringTuner {
         }
 
         // Timeout - return default value
-        telemetry.log().add("  ⚠ TIMEOUT - Using default kS: 0.02");
+        System.out.println("  ⚠ TIMEOUT - Using default kS: 0.02");
         return 0.02;
     }
 
@@ -653,7 +653,7 @@ public class SteeringTuner {
      * Checks if the driver has requested a stop.
      */
     private boolean isStopRequested() {
-        return Robot.getInstance().opModeIsActive() == false;
+        return Thread.currentThread().isInterrupted();
     }
 
     /**

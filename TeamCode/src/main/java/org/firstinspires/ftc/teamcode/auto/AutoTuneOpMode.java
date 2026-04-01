@@ -43,7 +43,7 @@ import static org.firstinspires.ftc.teamcode.globals.Constants.*;
  * @see org.firstinspires.ftc.teamcode.util.FeedforwardTuner
  */
 @Autonomous(name = "Auto Tune Feedforward", group = "Tuning")
-@TeleOp(name = "Auto Tune Feedforward")
+
 public class AutoTuneOpMode extends LinearOpMode {
 
     @Override
@@ -62,16 +62,16 @@ public class AutoTuneOpMode extends LinearOpMode {
         // Run auto-tuner
         FeedforwardTuner tuner = new FeedforwardTuner(drive);
 
-        telemetry.log().add("===========================================");
-        telemetry.log().add("   AUTOTUNE OP MODE");
-        telemetry.log().add("===========================================");
-        telemetry.log().add("");
-        telemetry.log().add("Starting automatic feedforward tuning...");
-        telemetry.log().add("");
-        telemetry.log().add("IMPORTANT: Robot must be on FIELD FLOOR!");
-        telemetry.log().add("- Normal driving surface (carpet/tiles)");
-        telemetry.log().add("- Clear area 4x4 feet minimum");
-        telemetry.log().add("- Robot will drive forward!");
+        System.out.println("===========================================");
+        System.out.println("   AUTOTUNE OP MODE");
+        System.out.println("===========================================");
+        System.out.println("");
+        System.out.println("Starting automatic feedforward tuning...");
+        System.out.println("");
+        System.out.println("IMPORTANT: Robot must be on FIELD FLOOR!");
+        System.out.println("- Normal driving surface (carpet/tiles)");
+        System.out.println("- Clear area 4x4 feet minimum");
+        System.out.println("- Robot will drive forward!");
         telemetry.update();
 
         if (isStopRequested()) return;
@@ -84,9 +84,9 @@ public class AutoTuneOpMode extends LinearOpMode {
         //   DRIVE_KS = results[0];
         //   DRIVE_KV = results[1];
 
-        telemetry.log().add("");
-        telemetry.log().add("Autotuning complete!");
-        telemetry.log().add("Check telemetry above for results.");
+        System.out.println("");
+        System.out.println("Autotuning complete!");
+        System.out.println("Check telemetry above for results.");
         telemetry.update();
 
         // Wait for user to stop

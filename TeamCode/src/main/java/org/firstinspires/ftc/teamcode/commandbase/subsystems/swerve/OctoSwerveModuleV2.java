@@ -103,10 +103,10 @@ public class OctoSwerveModuleV2 {
         return location;
     }
 
-    public ChassisSpeeds calculateVectorRobotCentric(ChassisSpeeds targetVelocity) {
+    public Vector2d calculateVectorRobotCentric(ChassisSpeeds targetVelocity) {
         double vX = targetVelocity.vxMetersPerSecond - targetVelocity.omegaRadiansPerSecond * location.getY();
         double vY = targetVelocity.vyMetersPerSecond + targetVelocity.omegaRadiansPerSecond * location.getX();
-        return new ChassisSpeeds(vX, vY);
+        return new Vector2d(vX, vY);
     }
 
     public void updateModuleWithVelocity(Vector2d targetVector) {

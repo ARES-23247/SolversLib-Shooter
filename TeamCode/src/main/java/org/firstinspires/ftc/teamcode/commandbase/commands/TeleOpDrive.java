@@ -2,7 +2,7 @@ package org.firstinspires.ftc.teamcode.commandbase.commands;
 
 import com.seattlesolvers.solverslib.command.CommandBase;
 import com.qualcomm.robotcore.hardware.Gamepad;
-import com.pedropathing.localization.Pose;
+import com.pedropathing.geometry.Pose;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.globals.Robot;
@@ -202,7 +202,7 @@ public class TeleOpDrive extends CommandBase {
         Pose currentPose = robot.drive.follower.getPoseTracker().getPose();
 
         // Create new pose with same x, y but heading = 0
-        Pose resetPose = new Pose(currentPose.getPosition().x, currentPose.getPosition().y, 0.0);
+        Pose resetPose = new Pose(currentPose.getX(), currentPose.getY(), 0.0);
 
         // Reset the localizer heading
         robot.drive.follower.setStartingPose(resetPose);
@@ -362,20 +362,20 @@ public class TeleOpDrive extends CommandBase {
      */
     public void outputTelemetry(com.seattlesolvers.solverslib.util.TelemetryData telemetry) {
         telemetry.addData("Drive Mode", fieldCentric ? "Field-Centric" : "Robot-Centric");
-        telemetry.addData("Speed", "%.1f%%", getSpeedPercentage());
-        telemetry.addData("Throttle", "%.1f%%", getThrottleInput() * 100.0);
+        telemetry.addData("Speed", String.format("%.1f%%", getSpeedPercentage()));
+        telemetry.addData("Throttle", String.format("%.1f%%", getThrottleInput() * 100.0));
         telemetry.addData("Y Button", gamepad.y ? "PRESSED" : "released");
-        telemetry.addData("Heading Resets", "%d", headingResetCount);
+        telemetry.addData("Heading Resets", String.format("%d", headingResetCount));
 
         if (headingResetCount > 0) {
             double timeSinceReset = getTimeSinceLastReset();
-            telemetry.addData("Last Reset", "%.1fs ago", timeSinceReset);
+            telemetry.addData("Last Reset", String.format("%.1fs ago", timeSinceReset));
         } else {
             telemetry.addData("Last Reset", "Never");
         }
 
-        telemetry.addData("Forward Input", "%.3f", lastForward);
-        telemetry.addData("Lateral Input", "%.3f", lastLateral);
-        telemetry.addData("Turn Input", "%.3f", lastTurn);
+        telemetry.addData("Forward Input", String.format("%.3f", lastForward));
+        telemetry.addData("Lateral Input", String.format("%.3f", lastLateral));
+        telemetry.addData("Turn Input", String.format("%.3f", lastTurn));
     }
 }

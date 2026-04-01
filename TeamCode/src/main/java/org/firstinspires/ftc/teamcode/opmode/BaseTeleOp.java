@@ -2,7 +2,7 @@ package org.firstinspires.ftc.teamcode.opmode;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
-import com.outoftheboxrobotics.photoncore.PhotonCore;
+
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.seattlesolvers.solverslib.command.CommandOpMode;
@@ -110,8 +110,8 @@ public class BaseTeleOp extends CommandOpMode {
         telemetryData.addData("Status", "Initialized. Waiting for Start.");
         telemetryData.update();
 
-        PhotonCore.CONTROL_HUB.clearBulkCache();
-        PhotonCore.EXPANSION_HUB.clearBulkCache();
+
+
     }
 
     /**
@@ -157,8 +157,6 @@ public class BaseTeleOp extends CommandOpMode {
         }
 
         // Run the master loop which ticks subsystems, command scheduler, and clears bulk cache
-        robot.profiler.start("Run + Update");
         robot.updateLoop(telemetryData);
-        robot.profiler.end("Run + Update");
     }
 }
