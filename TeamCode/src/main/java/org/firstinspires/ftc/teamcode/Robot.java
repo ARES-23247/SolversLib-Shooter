@@ -201,13 +201,14 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
      * Processes encoder signals from swerve drive motors and through-bore encoders.
      * Provides high-precision position feedback for PIDF control.
      *
-     * <p>The OctoQuadFWv3 driver adds support for:</p>
+     * <p><b>Usage:</b> All 8 ports are used for swerve drive:</p>
      * <ul>
-     *   <li>CRC-16 PROFIBUS validation for reliable encoder data</li>
-     *   <li>Built-in IMU for heading tracking (MK2 feature)</li>
-     *   <li>Absolute localizer for deadwheel odometry</li>
-     *   <li>PWM absolute encoder support with wrap tracking</li>
+     *   <li>Ports 0-3: Through-bore encoders for steering angle feedback</li>
+     *   <li>Ports 4-7: Drive motor encoders for velocity feedback</li>
      * </ul>
+     *
+     * <p><b>Note:</b> This project uses GoBilda Pinpoint for localization (IMU + deadwheel odometry),
+     * so OctoQuad is NOT used for pose estimation.</p>
      */
     public OctoQuadFWv3 octoquad;
 
@@ -448,9 +449,7 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
         octoquad = hwMap.get(OctoQuadFWv3.class, "octoquad");
         RobotLog.i("OctoQuad: Initialized - Chip ID: 0x" + Integer.toHexString(octoquad.getChipId() & 0xFF) +
                    " Firmware: " + octoquad.getFirmwareVersionString());
-
-        // Initialize OctoQuad localizer (if enabled in Constants)
-        initializeOctoQuadLocalizer();
+        RobotLog.i("OctoQuad: All 8 ports used for swerve drive (0-3: steering encoders, 4-7: drive encoders)");
 
         // Initialize SRS Hub for current monitoring (if enabled in Constants)
         initializeSRSHub();
@@ -484,152 +483,6 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
             cachedVoltage = 12;
         }
         return cachedVoltage;
-    }
-
-    /**
-     * Initializes the OctoQuad localizer with deadwheel odometry and IMU calibration.
-     *
-     * <p>This method configures the OctoQuad's built-in absolute localizer for position tracking
-     * using deadwheel encoders and the built-in IMU. The localizer provides:</p>
-     * <ul>
-     *   <li><b>Position (X, Y):</b> Deadwheel odometry in millimeters</li>
-     *   <li><b>Heading:</b> IMU-based heading tracking in radians</li>
-     *   <li><b>Velocity:</b> X, Y, and angular velocity measurements</li>
-     * </ul>
-     *
-     * <h3>Configuration Process:</h3>
-     * <ol>
-     *   <li>Set encoder ports for X and Y deadwheel tracking</li>
-     *   <li>Configure ticks-per-mm scaling factors</li>
-     *   <li>Set TCP (Tracking Center Point) offsets</li>
-     *   <li>Reset localizer to (0,0,0) and calibrate IMU</li>
-     *   <li>Wait for IMU calibration to complete</li>
-     * </ol>
-     *
-     * <p><b>Important:</b> The robot must remain stationary during IMU calibration.
-     * Calibration typically takes 3-5 seconds.</p>
-     *
-     * <h3>Current Status:</h3>
-     * <p>Localizer is currently DISABLED in Constants.java because all 8 OctoQuad ports
-     * are used for swerve drive (0-3: steering, 4-7: drive motors). To enable:</p>
-     * <ul>
-     *   <li>Set {@link org.firstinspires.ftc.teamcode.Constants#LOCALIZER_ENABLED} to true</li>
-     *   <li>Configure valid X/Y encoder ports in Constants.java</li>
-     *   <li>Ensure those ports are not used by swerve modules</li>
-     *   <li>Calibrate ticks-per-mm values</li>
-     * </ul>
-     *
-     * @see org.firstinspires.ftc.teamcode.Constants#LOCALIZER_ENABLED
-     * @see org.firstinspires.ftc.teamcode.hardware.OctoQuadFWv3#resetLocalizerAndCalibrateIMU()
-     */
-    private void initializeOctoQuadLocalizer() {
-        if (!org.firstinspires.ftc.teamcode.Constants.LOCALIZER_ENABLED) {
-            RobotLog.i("OctoQuad Localizer: DISABLED (check Constants.LOCALIZER_ENABLED)");
-            return;
-        }
-
-        RobotLog.i("OctoQuad Localizer: Initializing...");
-
-        try {
-            // Configure encoder ports for X and Y tracking
-            int xPort = org.firstinspires.ftc.teamcode.Constants.LOCALIZER_X_ENCODER_PORT;
-            int yPort = org.firstinspires.ftc.teamcode.Constants.LOCALIZER_Y_ENCODER_PORT;
-
-            if (xPort >= 0) {
-                octoquad.setLocalizerPortX(xPort);
-                RobotLog.i("OctoQuad Localizer: X encoder on port " + xPort);
-            } else {
-                RobotLog.w("OctoQuad Localizer: X encoder port not configured (set to -1)");
-            }
-
-            if (yPort >= 0) {
-                octoquad.setLocalizerPortY(yPort);
-                RobotLog.i("OctoQuad Localizer: Y encoder on port " + yPort);
-            } else {
-                RobotLog.w("OctoQuad Localizer: Y encoder port not configured (set to -1)");
-            }
-
-            // Configure ticks per millimeter scaling factors
-            octoquad.setLocalizerCountsPerMM_X(org.firstinspires.ftc.teamcode.Constants.LOCALIZER_TICKS_PER_MM_X);
-            octoquad.setLocalizerCountsPerMM_Y(org.firstinspires.ftc.teamcode.Constants.LOCALIZER_TICKS_PER_MM_Y);
-            RobotLog.i("OctoQuad Localizer: Ticks/MM - X=" + org.firstinspires.ftc.teamcode.Constants.LOCALIZER_TICKS_PER_MM_X +
-                       " Y=" + org.firstinspires.ftc.teamcode.Constants.LOCALIZER_TICKS_PER_MM_Y);
-
-            // Configure TCP (Tracking Center Point) offsets
-            octoquad.setLocalizerTcpOffsetMM_X(org.firstinspires.ftc.teamcode.Constants.LOCALIZER_TCP_OFFSET_X_MM);
-            octoquad.setLocalizerTcpOffsetMM_Y(org.firstinspires.ftc.teamcode.Constants.LOCALIZER_TCP_OFFSET_Y_MM);
-            RobotLog.i("OctoQuad Localizer: TCP Offset - X=" + org.firstinspires.ftc.teamcode.Constants.LOCALIZER_TCP_OFFSET_X_MM +
-                       "mm Y=" + org.firstinspires.ftc.teamcode.Constants.LOCALIZER_TCP_OFFSET_Y_MM + "mm");
-
-            // Configure IMU heading scalar
-            octoquad.setLocalizerImuHeadingScalar(org.firstinspires.ftc.teamcode.Constants.LOCALIZER_IMU_HEADING_SCALAR);
-
-            // Configure velocity measurement interval
-            octoquad.setLocalizerVelocityIntervalMS(org.firstinspires.ftc.teamcode.Constants.LOCALIZER_VELOCITY_INTERVAL_MS);
-            RobotLog.i("OctoQuad Localizer: Velocity interval = " + org.firstinspires.ftc.teamcode.Constants.LOCALIZER_VELOCITY_INTERVAL_MS + "ms");
-
-            // Reset localizer and start IMU calibration
-            RobotLog.i("OctoQuad Localizer: Starting IMU calibration... (robot must remain stationary)");
-            octoquad.resetLocalizerAndCalibrateIMU();
-
-            RobotLog.i("OctoQuad Localizer: Initialization complete. IMU calibration in progress.");
-
-        } catch (Exception e) {
-            RobotLog.e("OctoQuad Localizer: Initialization failed - " + e.getMessage());
-            e.printStackTrace();
-        }
-    }
-
-    /**
-     * Gets the current localizer status.
-     *
-     * <p>This method checks the status of the OctoQuad localizer algorithm.</p>
-     *
-     * @return LocalizerStatus enum value (NOT_INITIALIZED, WARMING_UP_IMU, CALIBRATING_IMU, RUNNING, FAULT_NO_IMU)
-     * @see org.firstinspires.ftc.teamcode.hardware.OctoQuadFWv3.LocalizerStatus
-     */
-    public org.firstinspires.ftc.teamcode.hardware.OctoQuadFWv3.LocalizerStatus getLocalizerStatus() {
-        if (octoquad == null) return org.firstinspires.ftc.teamcode.hardware.OctoQuadFWv3.LocalizerStatus.NOT_INITIALIZED;
-        return octoquad.getLocalizerStatus();
-    }
-
-    /**
-     * Reads the current localizer pose data.
-     *
-     * <p>This method returns the current position, heading, and velocity from the OctoQuad
-     * localizer. The data includes CRC validation for reliability.</p>
-     *
-     * @return LocalizerDataBlock containing position (mm), heading (rad), and velocity data
-     * @see org.firstinspires.ftc.teamcode.hardware.OctoQuadFWv3.LocalizerDataBlock
-     */
-    public org.firstinspires.ftc.teamcode.hardware.OctoQuadFWv3.LocalizerDataBlock getLocalizerData() {
-        if (octoquad == null) return null;
-        return octoquad.readLocalizerData();
-    }
-
-    /**
-     * Gets the current IMU heading from the OctoQuad localizer.
-     *
-     * <p>This is a convenience method for quickly accessing just the heading value.</p>
-     *
-     * @return heading in radians, or 0.0 if localizer is not available or data is invalid
-     */
-    public double getIMUHeading() {
-        org.firstinspires.ftc.teamcode.hardware.OctoQuadFWv3.LocalizerDataBlock data = getLocalizerData();
-        if (data != null && data.isPoseDataValid()) {
-            return data.heading_rad;
-        }
-        return 0.0;
-    }
-
-    /**
-     * Checks if the OctoQuad localizer is ready and providing valid data.
-     *
-     * @return true if localizer status is RUNNING and CRC validation passes
-     */
-    public boolean isLocalizerReady() {
-        org.firstinspires.ftc.teamcode.hardware.OctoQuadFWv3.LocalizerDataBlock data = getLocalizerData();
-        return data != null && data.isPoseDataValid();
     }
 
     /**

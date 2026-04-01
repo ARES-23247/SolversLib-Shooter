@@ -554,105 +554,20 @@ public class Constants {
      */
     public static final double SERVO_CACHE_TOLERANCE = 0.01;
 
-    // ===== OctoQuad Localizer Configuration =====
+    // ===== OctoQuad Configuration =====
 
     /**
-     * Whether to enable the OctoQuad's built-in absolute localizer for deadwheel odometry.
-     * <p>
-     * <b>Note:</b> If enabled, you must connect deadwheel encoders to unused OctoQuad ports
-     * and configure LOCALIZER_X_ENCODER_PORT and LOCALIZER_Y_ENCODER_PORT below.
-     * Current swerve configuration uses all 8 OctoQuad ports (0-3 for steering, 4-7 for drive),
-     * so you'll need to either:
+     * OctoQuad is used ONLY for swerve drive encoders, NOT for localization.
+     *
+     * <p><b>Port Usage:</b></p>
      * <ul>
-     *   <li>Add external deadwheels connected to OctoQuad ports (requires freeing up ports)</li>
-     *   <li>Use GoBilda Pinpoint for odometry instead (current setup)</li>
+     *   <li>Ports 0-3: Through-bore encoders for steering angle feedback</li>
+     *   <li>Ports 4-7: Drive motor encoders for velocity feedback</li>
      * </ul>
-     * </p>
+     *
+     * <p><b>Localization:</b> This project uses GoBilda Pinpoint for pose estimation
+     * (IMU + deadwheel odometry). OctoQuad's built-in localizer and IMU are NOT used.</p>
      */
-    public static final boolean LOCALIZER_ENABLED = false;
-
-    /**
-     * OctoQuad port for the X-axis deadwheel encoder (left/right strafing).
-     * Valid range: 0-7. Set to -1 to disable.
-     * <p>
-     * <b>Port mapping:</b> Ensure this port is not used by swerve modules.
-     * Current swerve usage: Ports 0-3 (steering), Ports 4-7 (drive wheels).
-     * </p>
-     */
-    public static final int LOCALIZER_X_ENCODER_PORT = -1;
-
-    /**
-     * OctoQuad port for the Y-axis deadwheel encoder (forward/backward).
-     * Valid range: 0-7. Set to -1 to disable.
-     * <p>
-     * <b>Port mapping:</b> Ensure this port is not used by swerve modules.
-     * Current swerve usage: Ports 0-3 (steering), Ports 4-7 (drive wheels).
-     * </p>
-     */
-    public static final int LOCALIZER_Y_ENCODER_PORT = -1;
-
-    /**
-     * Encoder counts per millimeter for the X-axis deadwheel.
-     * <p>
-     * <b>How to calibrate:</b>
-     * <ol>
-     *   <li>Reset encoders</li>
-     *   <li>Push robot exactly 1000mm (1 meter) straight</li>
-     *   <li>Read encoder counts: {@code counts = getEncoderCount()}</li>
-     *   <li>Calculate: {@code ticksPerMM = counts / 1000.0}</li>
-     * </ol>
-     * </p>
-     * <p>
-     * <b>Example:</b> If you get 8192 counts over 1000mm, set this to 8.192.
-     * </p>
-     */
-    public static final float LOCALIZER_TICKS_PER_MM_X = 8.192f;
-
-    /**
-     * Encoder counts per millimeter for the Y-axis deadwheel.
-     * Calibration procedure same as X-axis.
-     */
-    public static final float LOCALIZER_TICKS_PER_MM_Y = 8.192f;
-
-    /**
-     * TCP (Tracking Center Point) offset X in millimeters.
-     * The TCP is where the X and Y tracking wheel center lines intersect.
-     * This is typically the robot's center of rotation.
-     * <p>
-     * <b>How to measure:</b> Measure distance from robot center to X tracking wheel's
-     * center line (perpendicular distance). Positive = wheel is forward of center.
-     * </p>
-     */
-    public static final float LOCALIZER_TCP_OFFSET_X_MM = 0.0f;
-
-    /**
-     * TCP (Tracking Center Point) offset Y in millimeters.
-     * Measure distance from robot center to Y tracking wheel's center line.
-     * Positive = wheel is to the left of center.
-     */
-    public static final float LOCALIZER_TCP_OFFSET_Y_MM = 0.0f;
-
-    /**
-     * IMU heading scalar for improving heading accuracy.
-     * <p>
-     * <b>Default:</b> 1.0 (no scaling)
-     * </p>
-     * <p>
-     * <b>How to tune:</b> Use the HeadingScalarCalibrator example from DigitalChickenLabs
-     * to determine the optimal scalar value for your IMU. This compensates for
-     * systematic heading drift.
-     * </p>
-     */
-    public static final float LOCALIZER_IMU_HEADING_SCALAR = 1.0f;
-
-    /**
-     * Velocity measurement interval for the localizer in milliseconds.
-     * <p>
-     * <b>Range:</b> 1-255ms. Lower values = more responsive but more I2C traffic.
-     * Typical values: 10-50ms (20-100Hz update rate).
-     * </p>
-     */
-    public static final int LOCALIZER_VELOCITY_INTERVAL_MS = 20;
 
     // ===== SRS Hub Current Monitoring =====
 
