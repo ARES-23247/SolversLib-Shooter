@@ -257,4 +257,13 @@ public class OctoSwerveDrivetrainV2 {
     public String getEncoderType() {
         return modules[0].getEncoderType();
     }
+
+    /**
+     * Gets the array of swerve modules for telemetry and debugging.
+     *
+     * @return array of 4 swerve modules [FR, FL, BL, BR]
+     */
+    public org.firstinspires.ftc.teamcode.command.subsystems.drive.OctoSwerveModuleV2[] getModules() {
+        return modules;
+    }
 }

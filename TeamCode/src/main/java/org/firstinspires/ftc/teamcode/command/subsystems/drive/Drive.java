@@ -263,6 +263,12 @@ public class Drive extends SubsystemBase {
         // Required PedroPathing follower initialization steps
         // Assuming robot starts at 0, 0, 0
         follower.setStartingPose(new Pose(0, 0, 0));
+
+        // Initialize Panels dashboard for Capture & Replay
+        if (org.firstinspires.ftc.teamcode.Constants.ENABLE_DASHBOARD_OVERLAY) {
+            PanelsDashboard.getInstance().initialize();
+            PanelsDashboard.getInstance().clearTrajectory();
+        }
     }
 
     /**
@@ -615,9 +621,34 @@ public class Drive extends SubsystemBase {
         if (robot.telemetry != null && org.firstinspires.ftc.teamcode.Constants.ENABLE_DASHBOARD_OVERLAY) {
             PanelsDashboard dashboard = PanelsDashboard.getInstance();
 
-            // ===== Tab 1: Robot =====
+            // ===== Robot Pose & Localization (for field overlay) =====
             dashboard.setRobotPose(currentPose);
+            dashboard.setFusedPose(fusedPose);
 
+            // Get individual localization sources for replay debugging
+            // Note: Swerve odometry is tracked internally but not exposed via getPose()
+            // The fused pose combines swerve odometry with other sources
+
+            if (robot.pinpoint != null) {
+                Pose pinpointPose = new Pose(
+                    robot.pinpoint.getPosition().getX(org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit.INCH),
+                    robot.pinpoint.getPosition().getY(org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit.INCH),
+                    robot.pinpoint.getHeading(org.firstinspires.ftc.robotcore.external.navigation.AngleUnit.RADIANS)
+                );
+                dashboard.setPinpointPose(pinpointPose);
+            }
+
+            // Localization uncertainty (for EKF tuning during replay)
+            // Only available when sensor fusion is enabled
+            if (ENABLE_SENSOR_FUSION && sensorFusion != null) {
+                double[] posUncertainty = sensorFusion.getPositionUncertainty();
+                double headingUncertainty = sensorFusion.getHeadingUncertainty();
+                dashboard.setLocalizationUncertainty(posUncertainty, headingUncertainty);
+            } else {
+                dashboard.setLocalizationUncertainty(new double[]{0, 0}, 0);
+            }
+
+            // ===== Vision Status =====
             if (robot.vision != null) {
                 StringBuilder activeNames = new StringBuilder();
                 if (robot.vision.isTagVisible() && !robot.vision.getActiveCameras().isEmpty()) {
@@ -633,7 +664,7 @@ public class Drive extends SubsystemBase {
                 );
             }
 
-            // ===== Tab 2: Drive =====
+            // ===== Drive Inputs =====
             dashboard.setInputs(
                 teleOpSpeeds.vxMetersPerSecond,
                 teleOpSpeeds.vyMetersPerSecond,
@@ -641,6 +672,23 @@ public class Drive extends SubsystemBase {
                 isTeleOpMode ? "TeleOp" : "Auto"
             );
 
+            // ===== Module States (for detailed replay analysis) =====
+            double[] moduleAngles = new double[4];
+            double[] moduleTargetAngles = new double[4];
+            double[] moduleVelocities = new double[4];
+            double[] moduleTargetVelocities = new double[4];
+
+            org.firstinspires.ftc.teamcode.command.subsystems.drive.OctoSwerveModuleV2[] modules = swerve.getModules();
+            for (int i = 0; i < 4; i++) {
+                moduleAngles[i] = modules[i].getModuleHeadingRadians();
+                moduleTargetAngles[i] = modules[i].getTargetAngleRadians();
+                moduleVelocities[i] = modules[i].getCurrentVelocityInchesPerSec();
+                moduleTargetVelocities[i] = modules[i].getTargetMagnitude();
+            }
+
+            dashboard.setModuleStates(moduleAngles, moduleTargetAngles, moduleVelocities, moduleTargetVelocities);
+
+            // ===== Performance Metrics =====
             dashboard.setPerformance(
                 lastLoopTime,
                 batteryVoltage,
@@ -650,7 +698,7 @@ public class Drive extends SubsystemBase {
 
             dashboard.setHardwareStatus(swerve.getEncoderType());
 
-            // ===== Tab 3: Sensors =====
+            // ===== IMU & Sensor Status =====
             if (OCTOQUAD_IMU_BACKUP_ENABLED) {
                 dashboard.setIMUStatus(
                     robot.getIMUSource(),
@@ -665,7 +713,7 @@ public class Drive extends SubsystemBase {
                 }
             }
 
-            // Limelight camera details
+            // ===== Camera Status =====
             if (robot.limelightCameras != null) {
                 for (int i = 0; i < robot.limelightCameras.length; i++) {
                     LimelightCamera cam = robot.limelightCameras[i];
@@ -677,7 +725,7 @@ public class Drive extends SubsystemBase {
                 }
             }
 
-            // Update all tabs
+            // Update dashboard (field overlay + graphs)
             dashboard.update();
         }
 
@@ -779,7 +827,7 @@ public class Drive extends SubsystemBase {
      * @param y Y position (inches)
      * @return true if within bounds, false if outside
      */
-    private boolean isWithinFieldBounds(double x, double y) {
+    private boolean isyeWithinFieldBounds(double x, double y) {
         double margin = FIELD_BOUNDARY_MARGIN;
         double xMin = FIELD_X_MIN - margin;
         double xMax = FIELD_X_MAX + margin;
