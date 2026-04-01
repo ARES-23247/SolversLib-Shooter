@@ -9,6 +9,7 @@ import org.firstinspires.ftc.teamcode.util.localization.SensorFusionLocalizer;
 import org.firstinspires.ftc.teamcode.util.localization.SwerveOdometry;
 import org.firstinspires.ftc.teamcode.util.monitoring.PinpointHealthMonitor;
 import org.firstinspires.ftc.teamcode.dashboard.PanelsDashboard;
+import org.firstinspires.ftc.teamcode.util.vision.LimelightCamera;
 
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.Pose;
@@ -620,20 +621,26 @@ public class Drive extends SubsystemBase {
         if (org.firstinspires.ftc.teamcode.Constants.ENABLE_DASHBOARD_OVERLAY) {
             PanelsDashboard dashboard = PanelsDashboard.getInstance();
 
-            // Update robot pose
+            // ===== Tab 1: Robot =====
             dashboard.setRobotPose(currentPose);
 
-            // Update performance metrics
-            dashboard.setLoopTime(lastLoopTime);
-            dashboard.setBatteryVoltage(batteryVoltage);
-
-            // Update current monitoring
-            if (srsHubReady) {
-                dashboard.setCurrentDraw(currentDraw);
-                dashboard.setCurrentLimitingActive(currentLimitingActive);
+            // Vision status with active camera names
+            StringBuilder activeNames = new StringBuilder();
+            if (robot.vision != null && robot.vision.isTagVisible()) {
+                for (LimelightCamera cam : robot.vision.getActiveCameras()) {
+                    activeNames.append(cam.getName()).append(", ");
+                }
+                if (activeNames.length() > 2) {
+                    activeNames.setLength(activeNames.length() - 2);  // Remove trailing ", "
+                }
             }
+            dashboard.setVisionStatus(
+                robot.vision != null && robot.vision.isTagVisible(),
+                robot.vision != null ? robot.vision.getActiveCameras().size() : 0,
+                activeNames.toString()
+            );
 
-            // Update drive inputs
+            // ===== Tab 2: Drive =====
             dashboard.setInputs(
                 teleOpSpeeds.vxMetersPerSecond,
                 teleOpSpeeds.vyMetersPerSecond,
@@ -641,13 +648,14 @@ public class Drive extends SubsystemBase {
                 isTeleOpMode ? "TeleOp" : "Auto"
             );
 
-            dashboard.setEncoderType(swerve.getEncoderType());
+            dashboard.setPerformance(lastLoopTime, batteryVoltage,
+                srsHubReady ? currentDraw : 0.0, currentLimitingActive);
+            dashboard.setHardwareStatus(swerve.getEncoderType());
 
-            // Update IMU backup status
+            // ===== Tab 3: Sensors =====
             if (OCTOQUAD_IMU_BACKUP_ENABLED) {
                 dashboard.setIMUStatus(robot.getIMUSource(), robot.getOctoQuadIMUOffset());
 
-                // Update Pinpoint health
                 if (ENABLE_PINPOINT_HEALTH_MONITOR && robot.pinpoint != null) {
                     dashboard.setPinpointStatus(
                         pinpointHealthMonitor.isHealthy(),
@@ -656,13 +664,14 @@ public class Drive extends SubsystemBase {
                 }
             }
 
-            // Update vision status
-            if (robot.vision != null) {
-                dashboard.setVisionStatus(
-                    robot.vision.isTagVisible(),
-                    robot.vision.getActiveCameras().size(),
-                    robot.vision.getHealthyCameraCount()
-                );
+            // Limelight camera details
+            if (robot.limelightCameras != null) {
+                for (int i = 0; i < robot.limelightCameras.length; i++) {
+                    LimelightCamera cam = robot.limelightCameras[i];
+                    String status = cam.hasValidDetection() ? "TRACKING" : "SEARCHING";
+                    double distance = cam.getDetectionDistance();
+                    dashboard.setCameraStatus(i, status, distance);
+                }
             }
 
             // Send all data to Panels dashboard
