@@ -8,14 +8,15 @@ import org.firstinspires.ftc.teamcode.hardware.OctoQuadFWv3;
 import org.firstinspires.ftc.teamcode.util.localization.SensorFusionLocalizer;
 import org.firstinspires.ftc.teamcode.util.localization.SwerveOdometry;
 import org.firstinspires.ftc.teamcode.util.monitoring.PinpointHealthMonitor;
-import org.firstinspires.ftc.teamcode.dashboard.PanelsDashboard;
-import org.firstinspires.ftc.teamcode.util.vision.LimelightCamera;
 
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.Pose;
 import com.seattlesolvers.solverslib.kinematics.wpilibkinematics.ChassisSpeeds;
 import com.seattlesolvers.solverslib.hardware.motors.MotorEx;
 import com.seattlesolvers.solverslib.hardware.motors.CRServoEx;
+
+import org.firstinspires.ftc.teamcode.dashboard.PanelsDashboard;
+import org.firstinspires.ftc.teamcode.util.vision.LimelightCamera;
 
 import static org.firstinspires.ftc.teamcode.Constants.*;
 
@@ -609,36 +610,28 @@ public class Drive extends SubsystemBase {
         // Get current pose once (avoid redundant calls)
         Pose currentPose = follower.getPoseTracker().getPose();
 
-        // Read OctoQuad localizer data once per loop (avoid redundant I2C reads)
-        OctoQuadFWv3.LocalizerDataBlock localizerData = null;
-        boolean localizerReady = org.firstinspires.ftc.teamcode.Constants.LOCALIZER_ENABLED &&
-                                  robot.isLocalizerReady();
-        if (localizerReady) {
-            localizerData = robot.getLocalizerData();
-        }
-
-        // ===== Panels Dashboard Update =====
-        if (org.firstinspires.ftc.teamcode.Constants.ENABLE_DASHBOARD_OVERLAY) {
+        // ===== Panels Dashboard Telemetry (for testing/practice) =====
+        // During competition, robot WiFi is unavailable - only driver station telemetry works
+        if (robot.telemetry != null && org.firstinspires.ftc.teamcode.Constants.ENABLE_DASHBOARD_OVERLAY) {
             PanelsDashboard dashboard = PanelsDashboard.getInstance();
 
             // ===== Tab 1: Robot =====
             dashboard.setRobotPose(currentPose);
 
-            // Vision status with active camera names
-            StringBuilder activeNames = new StringBuilder();
-            if (robot.vision != null && robot.vision.isTagVisible()) {
-                for (LimelightCamera cam : robot.vision.getActiveCameras()) {
-                    activeNames.append(cam.getName()).append(", ");
+            if (robot.vision != null) {
+                StringBuilder activeNames = new StringBuilder();
+                if (robot.vision.isTagVisible() && !robot.vision.getActiveCameras().isEmpty()) {
+                    for (LimelightCamera cam : robot.vision.getActiveCameras()) {
+                        if (activeNames.length() > 0) activeNames.append(", ");
+                        activeNames.append(cam.getName());
+                    }
                 }
-                if (activeNames.length() > 2) {
-                    activeNames.setLength(activeNames.length() - 2);  // Remove trailing ", "
-                }
+                dashboard.setVisionStatus(
+                    robot.vision.isTagVisible(),
+                    robot.vision.getActiveCameras().size(),
+                    activeNames.toString()
+                );
             }
-            dashboard.setVisionStatus(
-                robot.vision != null && robot.vision.isTagVisible(),
-                robot.vision != null ? robot.vision.getActiveCameras().size() : 0,
-                activeNames.toString()
-            );
 
             // ===== Tab 2: Drive =====
             dashboard.setInputs(
@@ -648,13 +641,21 @@ public class Drive extends SubsystemBase {
                 isTeleOpMode ? "TeleOp" : "Auto"
             );
 
-            dashboard.setPerformance(lastLoopTime, batteryVoltage,
-                srsHubReady ? currentDraw : 0.0, currentLimitingActive);
+            dashboard.setPerformance(
+                lastLoopTime,
+                batteryVoltage,
+                currentDraw,
+                currentLimitingActive
+            );
+
             dashboard.setHardwareStatus(swerve.getEncoderType());
 
             // ===== Tab 3: Sensors =====
             if (OCTOQUAD_IMU_BACKUP_ENABLED) {
-                dashboard.setIMUStatus(robot.getIMUSource(), robot.getOctoQuadIMUOffset());
+                dashboard.setIMUStatus(
+                    robot.getIMUSource(),
+                    robot.getOctoQuadIMUOffset()
+                );
 
                 if (ENABLE_PINPOINT_HEALTH_MONITOR && robot.pinpoint != null) {
                     dashboard.setPinpointStatus(
@@ -668,13 +669,15 @@ public class Drive extends SubsystemBase {
             if (robot.limelightCameras != null) {
                 for (int i = 0; i < robot.limelightCameras.length; i++) {
                     LimelightCamera cam = robot.limelightCameras[i];
-                    String status = cam.hasValidDetection() ? "TRACKING" : "SEARCHING";
-                    double distance = cam.getDetectionDistance();
-                    dashboard.setCameraStatus(i, status, distance);
+                    dashboard.setCameraStatus(
+                        i,
+                        cam.hasValidDetection() ? "TRACKING" : "SEARCHING",
+                        cam.getDetectionDistance()
+                    );
                 }
             }
 
-            // Send all data to Panels dashboard
+            // Update all tabs
             dashboard.update();
         }
 
@@ -692,15 +695,16 @@ public class Drive extends SubsystemBase {
             robot.logger.addData("Input Mode", isTeleOpMode ? "TeleOp" : "Auto");
 
             // Log OctoQuad Localizer data (if available) - using cached data to avoid redundant I2C reads
-            if (localizerReady && localizerData != null) {
-                robot.logger.addData("OctoQuad X (mm)", localizerData.posX_mm);
-                robot.logger.addData("OctoQuad Y (mm)", localizerData.posY_mm);
-                robot.logger.addData("OctoQuad Heading (rad)", localizerData.heading_rad);
-                robot.logger.addData("OctoQuad VelX (mm/s)", localizerData.velX_mmS);
-                robot.logger.addData("OctoQuad VelY (mm/s)", localizerData.velY_mmS);
-                robot.logger.addData("OctoQuad IMU Status", localizerData.localizerStatus.toString());
-                robot.logger.addData("OctoQuad CRC Valid", localizerData.crcOk);
-            }
+            // TODO: Re-enable when LOCALIZER_ENABLED constant is added to Constants.java
+            // if (localizerReady && localizerData != null) {
+            //     robot.logger.addData("OctoQuad X (mm)", localizerData.posX_mm);
+            //     robot.logger.addData("OctoQuad Y (mm)", localizerData.posY_mm);
+            //     robot.logger.addData("OctoQuad Heading (rad)", localizerData.heading_rad);
+            //     robot.logger.addData("OctoQuad VelX (mm/s)", localizerData.velX_mmS);
+            //     robot.logger.addData("OctoQuad VelY (mm/s)", localizerData.velY_mmS);
+            //     robot.logger.addData("OctoQuad IMU Status", localizerData.localizerStatus.toString());
+            //     robot.logger.addData("OctoQuad CRC Valid", localizerData.crcOk);
+            // }
 
             // Log SRS Hub current data (if available) - using cached data to avoid redundant I2C reads
             if (srsHubReady) {

@@ -9,8 +9,6 @@ import com.seattlesolvers.solverslib.hardware.motors.MotorEx;
 import com.seattlesolvers.solverslib.kinematics.wpilibkinematics.ChassisSpeeds;
 import com.seattlesolvers.solverslib.geometry.Vector2d;
 import org.firstinspires.ftc.teamcode.hardware.SRSHub;
-import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
-import com.acmerobotics.dashboard.canvas.Canvas;
 import com.pedropathing.geometry.Pose;
 import org.firstinspires.ftc.teamcode.util.DataLogger;
 import org.firstinspires.ftc.teamcode.util.control.CurrentLimiter;
@@ -195,54 +193,6 @@ public class OctoSwerveDrivetrainV2 {
      */
     public void drive(ChassisSpeeds speeds) {
         drive(speeds, 0.0);
-    }
-
-    /**
-     * Sends telemetry data to FTC Dashboard.
-     */
-    public void drawTelemetry(TelemetryPacket packet, Pose robotPose) {
-        String[] moduleNames = {"FR", "FL", "BL", "BR"};
-        Canvas field = packet.fieldOverlay();
-
-        for (int i = 0; i < 4; i++) {
-            OctoSwerveModuleV2 module = modules[i];
-
-            // Position and velocity
-            packet.put(moduleNames[i] + " Target Angle (Rad)", String.format("%.3f", module.getTargetAngleRadians()));
-            packet.put(moduleNames[i] + " Actual Angle (Rad)", String.format("%.3f", module.getModuleHeadingRadians()));
-            packet.put(moduleNames[i] + " Target Vel (In/s)", String.format("%.2f", module.getTargetMagnitude()));
-            packet.put(moduleNames[i] + " Actual Vel (In/s)", String.format("%.2f", module.getCurrentVelocityInchesPerSec()));
-            packet.put(moduleNames[i] + " Encoder Type", module.getEncoderType());
-
-            // Drive motor telemetry
-            packet.put(moduleNames[i] + " Drive FF", String.format("%.3f", module.getLastDriveFeedforward()));
-            packet.put(moduleNames[i] + " Drive PID", String.format("%.3f", module.getLastDrivePIDCorrection()));
-            packet.put(moduleNames[i] + " Drive Power", String.format("%.3f", module.getLastDriveMotorPower()));
-
-            // Steering servo telemetry
-            packet.put(moduleNames[i] + " Steer FF", String.format("%.4f", module.getLastSteerFeedforward()));
-            packet.put(moduleNames[i] + " Steer PID", String.format("%.4f", module.getLastSteerPIDCorrection()));
-            packet.put(moduleNames[i] + " Steer Power", String.format("%.4f", module.getLastSteerServoPower()));
-
-            // Draw wheel orientation
-            if (robotPose != null) {
-                Vector2d loc = module.getLocation();
-                double heading = robotPose.getHeading();
-
-                double globalX = robotPose.getX() + loc.getX() * Math.cos(heading) - loc.getY() * Math.sin(heading);
-                double globalY = robotPose.getY() + loc.getX() * Math.sin(heading) + loc.getY() * Math.cos(heading);
-
-                double wheelHeading = heading + module.getModuleHeadingRadians();
-
-                field.setStroke("#FF5722");
-                field.strokeLine(
-                    globalX, globalY,
-                    globalX + 2.5 * Math.cos(wheelHeading),
-                    globalY + 2.5 * Math.sin(wheelHeading)
-                );
-                field.fillCircle(globalX, globalY, 0.5);
-            }
-        }
     }
 
     /**

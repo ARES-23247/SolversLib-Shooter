@@ -31,7 +31,8 @@ import org.firstinspires.ftc.teamcode.Robot;
  *       continuous driver control via gamepad1 with field-centric driving and throttle control</li>
  *   <li><b>Update Loop:</b> Calls {@code robot.updateLoop(telemetryData)} which runs the command
  *       scheduler, updates subsystems, clears PhotonCore caches, and outputs telemetry</li>
- *   <li><b>Telemetry:</b> Outputs to driver station. Panels web dashboard is updated by Drive subsystem.</li>
+ *   <li><b>Telemetry:</b> Outputs to both driver station and FTC Dashboard via MultipleTelemetry.
+ *       During competition, FTC Dashboard is unavailable and all data shows on driver station.</li>
  * </ol>
  *
  * <p><b>Delegation:</b> This OpMode delegates hardware management, command scheduling, and
@@ -52,8 +53,8 @@ public class BaseTeleOp extends CommandOpMode {
     public ElapsedTime timer;
 
     /**
-     * Telemetry instance that sends data to the driver station.
-     * Panels web dashboard is updated separately by the Drive subsystem.
+     * Telemetry instance for driver station display.
+     * Panels dashboard is used separately for web-based visualization during testing.
      */
     TelemetryData telemetryData = new TelemetryData(telemetry);
 

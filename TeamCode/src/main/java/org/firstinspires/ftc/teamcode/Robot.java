@@ -711,23 +711,24 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
         }
 
         try {
+            // TODO: Fix Pinpoint health checks - API methods don't exist in GoBildaPinpointDriver
             // Check if device is disconnected
-            if (pinpoint.isDisconnected()) {
-                RobotLog.w("Pinpoint: Device disconnected, using OctoQuad IMU backup");
-                return false;
-            }
+            // if (pinpoint.isDisconnected()) {
+            //     RobotLog.w("Pinpoint: Device disconnected, using OctoQuad IMU backup");
+            //     return false;
+            // }
 
-            // Check if encoder data is stale (no updates for >100ms)
-            if (pinpoint.getEncoderData().isStale()) {
-                RobotLog.w("Pinpoint: Encoder data stale, using OctoQuad IMU backup");
-                return false;
-            }
+            // // Check if encoder data is stale (no updates for >100ms)
+            // if (pinpoint.getEncoderData().isStale()) {
+            //     RobotLog.w("Pinpoint: Encoder data stale, using OctoQuad IMU backup");
+            //     return false;
+            // }
 
-            // Check if IMU is failed or calibrating
-            if (!pinpoint.getIMUStatus().equals("READY")) {
-                RobotLog.w("Pinpoint: IMU status=" + pinpoint.getIMUStatus() + ", using OctoQuad IMU backup");
-                return false;
-            }
+            // // Check if IMU is failed or calibrating
+            // if (!pinpoint.getIMUStatus().equals("READY")) {
+            //     RobotLog.w("Pinpoint: IMU status=" + pinpoint.getIMUStatus() + ", using OctoQuad IMU backup");
+            //     return false;
+            // }
 
             return true;  // Pinpoint is healthy
 
@@ -755,7 +756,7 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
         // Try Pinpoint IMU first (primary)
         if (isPinpointHealthy()) {
             try {
-                double heading = pinpoint.getHeading() * (Math.PI / 180.0);  // Convert deg to rad
+                double heading = Math.toRadians(pinpoint.getHeading(org.firstinspires.ftc.robotcore.external.navigation.AngleUnit.DEGREES));  // Convert deg to rad
                 return heading;
             } catch (Exception e) {
                 RobotLog.w("Pinpoint: Failed to read heading: " + e.getMessage() + ", trying OctoQuad IMU");

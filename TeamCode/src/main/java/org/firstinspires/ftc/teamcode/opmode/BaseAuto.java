@@ -52,7 +52,8 @@ import org.firstinspires.ftc.teamcode.Robot;
  * @see <a href="https://pedropathing.com/ Pedro Pathing Documentation</a>
  */
 @Autonomous(name = "Base Auto", group = "Autonomous")
-public class BaseAuto extends CommandOpMode {
+public class
+BaseAuto extends CommandOpMode {
 
     /**
      * Timer for measuring loop execution time.
@@ -61,8 +62,8 @@ public class BaseAuto extends CommandOpMode {
     public ElapsedTime timer;
 
     /**
-     * Telemetry instance that sends data to the driver station.
-     * Panels web dashboard is updated separately by the Drive subsystem.
+     * Telemetry instance for driver station display.
+     * Panels dashboard is used separately for web-based visualization during testing.
      */
     TelemetryData telemetryData = new TelemetryData(telemetry);
 

@@ -95,69 +95,44 @@ public class PanelsDashboard {
      * Call this method once per loop iteration.
      */
     public void update() {
-        // ===== Tab 1: Robot =====
-        telemetry.addTab("Robot");
-
-        // Robot Pose
+        // ===== Robot Pose =====
         telemetry.addData("Pose X (in)", robotPose != null ? String.format("%.2f", robotPose.getX()) : "0.00");
         telemetry.addData("Pose Y (in)", robotPose != null ? String.format("%.2f", robotPose.getY()) : "0.00");
         telemetry.addData("Pose Heading (°)", robotPose != null ? String.format("%.1f", Math.toDegrees(robotPose.getHeading())) : "0.0");
 
         // Vision Status
-        telemetry.addData("Tag Visible", visionTagVisible ? "YES ✓" : "NO");
-        telemetry.addData("Active Cameras", visionActiveCameras);
+        telemetry.addData("Vision Tag Visible", visionTagVisible ? "YES" : "NO");
+        telemetry.addData("Vision Active Cameras", visionActiveCameras);
 
-        // Limelight Camera URLs (for direct viewing)
-        if (robot.limelightCameras != null && robot.limelightCameras.length > 0) {
-            StringBuilder camUrls = new StringBuilder();
-            for (int i = 0; i < robot.limelightCameras.length; i++) {
-                String camName = robot.limelightCameras[i].getName();
-                String url = "http://" + robot.limelightCameras[i].getLimelight().getIpAddress() + ":5800";
-                camUrls.append(camName).append(": ").append(url);
-                if (i < robot.limelightCameras.length - 1) camUrls.append(" | ");
-            }
-            telemetry.addData("Camera Streams", camUrls.toString());
-        }
-
-        // ===== Tab 2: Drive =====
-        telemetry.addTab("Drive");
-
-        // Inputs
-        telemetry.addData("Input Fwd", String.format("%.3f", inputForward));
-        telemetry.addData("Input Lat", String.format("%.3f", inputLateral));
+        // ===== Drive Inputs =====
+        telemetry.addData("Input Forward", String.format("%.3f", inputForward));
+        telemetry.addData("Input Lateral", String.format("%.3f", inputLateral));
         telemetry.addData("Input Turn", String.format("%.3f", inputTurn));
-        telemetry.addData("Mode", inputMode);
+        telemetry.addData("Input Mode", inputMode);
 
-        // Performance
+        // ===== Performance =====
         telemetry.addData("Loop Time", String.format("%.1f ms", loopTime * 1000));
-        telemetry.addData("Frequency", String.format("%.1f Hz", loopFrequency));
+        telemetry.addData("Loop Frequency", String.format("%.1f Hz", loopFrequency));
 
-        // Hardware
-        telemetry.addData("Battery", String.format("%.2f V", batteryVoltage));
-        telemetry.addData("Current", String.format("%.2f A", currentDraw));
-        telemetry.addData("Limiting", currentLimitingActive ? "ACTIVE" : "OFF");
-        telemetry.addData("Encoders", encoderType);
+        // ===== Hardware =====
+        telemetry.addData("Battery Voltage", String.format("%.2f V", batteryVoltage));
+        telemetry.addData("Current Draw", String.format("%.2f A", currentDraw));
+        telemetry.addData("Current Limiting", currentLimitingActive ? "ACTIVE" : "OFF");
+        telemetry.addData("Encoder Type", encoderType);
 
-        // ===== Tab 3: Sensors =====
-        telemetry.addTab("Sensors");
-
-        // IMU Backup Status
+        // ===== Sensors =====
         telemetry.addData("IMU Source", imuSource);
-        telemetry.addData("OctoQuad Offset", String.format("%.2f°", Math.toDegrees(octoquadIMUOffset)));
-
-        // Pinpoint Health
-        telemetry.addData("Pinpoint Healthy", pinpointHealthy ? "YES ✓" : "DRIFTED");
+        telemetry.addData("OctoQuad IMU Offset", String.format("%.2f°", Math.toDegrees(octoquadIMUOffset)));
+        telemetry.addData("Pinpoint Healthy", pinpointHealthy ? "YES" : "DRIFTED");
         telemetry.addData("Pinpoint Bad Count", pinpointBadCount);
 
-        // Limelight Camera Details
-        if (robot.limelightCameras != null && robot.limelightCameras.length > 0) {
-            telemetry.addData("Cam 1 Status", camera1Status);
-            telemetry.addData("Cam 1 Target Dist", String.format("%.1f in", camera1Distance));
+        // ===== Camera Details =====
+        telemetry.addData("Cam 1 Status", camera1Status);
+        telemetry.addData("Cam 1 Target Dist", String.format("%.1f in", camera1Distance));
 
-            if (robot.limelightCameras.length > 1) {
-                telemetry.addData("Cam 2 Status", camera2Status);
-                telemetry.addData("Cam 2 Target Dist", String.format("%.1f in", camera2Distance));
-            }
+        if (robot.limelightCameras != null && robot.limelightCameras.length > 1) {
+            telemetry.addData("Cam 2 Status", camera2Status);
+            telemetry.addData("Cam 2 Target Dist", String.format("%.1f in", camera2Distance));
         }
     }
 
