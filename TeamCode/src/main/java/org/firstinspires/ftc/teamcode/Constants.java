@@ -565,9 +565,36 @@ public class Constants {
      *   <li>Ports 4-7: Drive motor encoders for velocity feedback</li>
      * </ul>
      *
-     * <p><b>Localization:</b> This project uses GoBilda Pinpoint for pose estimation
-     * (IMU + deadwheel odometry). OctoQuad's built-in localizer and IMU are NOT used.</p>
+     * <p><b>Primary Localization:</b> GoBilda Pinpoint for pose estimation (IMU + deadwheel odometry).</p>
+     *
+     * <p><b>Backup IMU:</b> OctoQuad's built-in IMU is available as a backup heading source if Pinpoint fails.</p>
      */
+    public static final boolean OCTOQUAD_IMU_BACKUP_ENABLED = true;
+
+    /**
+     * OctoQuad IMU heading scalar for backup mode.
+     * <p>
+     * <b>Default:</b> 1.0 (no scaling)
+     * </p>
+     * <p>
+     * <b>How to tune:</b> Use the HeadingScalarCalibrator example from DigitalChickenLabs
+     * to determine the optimal scalar value for your IMU. This compensates for
+     * systematic heading drift.
+     * </p>
+     */
+    public static final float OCTOQUAD_IMU_HEADING_SCALAR = 1.0f;
+
+    /**
+     * OctoQuad IMU measurement noise for sensor fusion (radians).
+     * <p>
+     * This represents the uncertainty in OctoQuad IMU heading measurements when used as backup.
+     * OctoQuad IMU is generally less accurate than Pinpoint IMU, so this should be higher.
+     * </p>
+     * <p>
+     * <b>Note:</b> Higher values = filter trusts OctoQuad IMU less (only in backup mode).
+     * </p>
+     */
+    public static final double FUSION_OCTOQUAD_IMU_NOISE_HEADING = 0.05;
 
     // ===== SRS Hub Current Monitoring =====
 

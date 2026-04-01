@@ -302,6 +302,78 @@ public class SensorFusionLocalizer {
     }
 
     /**
+     * Correction step using OctoQuad IMU heading measurement (backup mode).
+     *
+     * <p>This method corrects ONLY the heading state estimate using OctoQuad IMU.
+     * This is used as a fallback when Pinpoint IMU is unavailable or unhealthy.</p>
+     *
+     * <p><b>When to use:</b> Only use this correction when Pinpoint has failed.
+     * OctoQuad IMU is less accurate than Pinpoint, so it should only be used as backup.</p>
+     *
+     * @param heading measured heading from OctoQuad IMU (radians)
+     * @param headingNoise heading measurement noise std dev (radians)
+     */
+    public void correctWithOctoQuadIMU(double heading, double headingNoise) {
+        // Build measurement matrix for heading-only correction
+        // We only measure heading, not position
+        double[][] H_heading = {
+            {0, 0, 0, 0, 0, 0},  // Don't measure x
+            {0, 0, 0, 0, 0, 0},  // Don't measure y
+            {0, 0, 1, 0, 0, 0}   // Measure heading
+        };
+
+        // Build noise covariance for heading-only measurement
+        double[][] R_octoquad = {
+            {1000.0 * 1000.0, 0, 0},           // Huge noise for x (don't use)
+            {0, 1000.0 * 1000.0, 0},           // Huge noise for y (don't use)
+            {0, 0, headingNoise * headingNoise}  // Actual noise for heading
+        };
+
+        // Compute innovation: y = z - H * x
+        double[] y = {
+            0,  // Don't correct x
+            0,  // Don't correct y
+            heading - x[2]  // Heading innovation
+        };
+
+        // Normalize heading innovation to [-π, π]
+        while (y[2] > Math.PI) y[2] -= 2 * Math.PI;
+        while (y[2] < -Math.PI) y[2] += 2 * Math.PI;
+
+        // Compute innovation covariance: S = H * P * H^T + R
+        double[][] S = matrixAdd(
+            matrixMultiply(matrixMultiply(H_heading, P), transpose(H_heading)),
+            R_octoquad
+        );
+
+        // Compute Kalman gain: K = P * H^T * S^-1
+        double[][] K = matrixMultiply(
+            matrixMultiply(P, transpose(H_heading)),
+            inverse(S)
+        );
+
+        // Update state: x = x + K * y
+        double[] x_new = x.clone();
+        for (int i = 0; i < 6; i++) {
+            for (int j = 0; j < 3; j++) {
+                x_new[i] += K[i][j] * y[j];
+            }
+        }
+
+        // Update covariance: P = (I - K * H) * P
+        double[][] KH = matrixMultiply(K, H_heading);
+        double[][] I_KH = subtractFromIdentity(KH);
+        double[][] P_new = matrixMultiply(I_KH, P);
+
+        // Normalize heading
+        while (x_new[2] > Math.PI) x_new[2] -= 2 * Math.PI;
+        while (x_new[2] < -Math.PI) x_new[2] += 2 * Math.PI;
+
+        x = x_new;
+        P = P_new;
+    }
+
+    /**
      * Generic correction step using a pose measurement.
      *
      * <h3>Correction Equations:</h3>

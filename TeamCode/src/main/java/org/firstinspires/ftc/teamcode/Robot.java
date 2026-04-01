@@ -683,4 +683,125 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
     public double getAverageLoopTime() {
         return averageLoopTimeMs;
     }
+
+    // ===== IMU Backup Methods =====
+
+    /**
+     * Checks if Pinpoint is healthy and providing valid data.
+     *
+     * <p>This method checks for common Pinpoint failure modes:</p>
+     * <ul>
+     *   <li>Device is disconnected</li>
+     *   <li>Encoder data is stale (timeout)</li>
+     *   <li>IMU has failed or is calibrating</li>
+     * </ul>
+     *
+     * @return true if Pinpoint is healthy, false if it should use OctoQuad IMU backup
+     */
+    public boolean isPinpointHealthy() {
+        if (pinpoint == null) {
+            return false;  // Pinpoint not initialized
+        }
+
+        try {
+            // Check if device is disconnected
+            if (pinpoint.isDisconnected()) {
+                RobotLog.w("Pinpoint: Device disconnected, using OctoQuad IMU backup");
+                return false;
+            }
+
+            // Check if encoder data is stale (no updates for >100ms)
+            if (pinpoint.getEncoderData().isStale()) {
+                RobotLog.w("Pinpoint: Encoder data stale, using OctoQuad IMU backup");
+                return false;
+            }
+
+            // Check if IMU is failed or calibrating
+            if (!pinpoint.getIMUStatus().equals("READY")) {
+                RobotLog.w("Pinpoint: IMU status=" + pinpoint.getIMUStatus() + ", using OctoQuad IMU backup");
+                return false;
+            }
+
+            return true;  // Pinpoint is healthy
+
+        } catch (Exception e) {
+            RobotLog.e("Pinpoint: Health check failed: " + e.getMessage() + ", using OctoQuad IMU backup");
+            return false;
+        }
+    }
+
+    /**
+     * Gets the current IMU heading, with automatic fallback to OctoQuad IMU.
+     *
+     * <p>This method tries to get heading from Pinpoint IMU first (primary).
+     * If Pinpoint is unhealthy, it automatically falls back to OctoQuad IMU (backup).</p>
+     *
+     * <p><b>Heading Source Priority:</b></p>
+     * <ol>
+     *   <li><b>Primary:</b> GoBilda Pinpoint IMU (most accurate)</li>
+     *   <li><b>Backup:</b> OctoQuad IMU (less accurate but reliable)</li>
+     * </ol>
+     *
+     * @return heading in radians, or 0.0 if both IMUs are unavailable
+     */
+    public double getIMUHeading() {
+        // Try Pinpoint IMU first (primary)
+        if (isPinpointHealthy()) {
+            try {
+                double heading = pinpoint.getHeading() * (Math.PI / 180.0);  // Convert deg to rad
+                return heading;
+            } catch (Exception e) {
+                RobotLog.w("Pinpoint: Failed to read heading: " + e.getMessage() + ", trying OctoQuad IMU");
+            }
+        }
+
+        // Fall back to OctoQuad IMU (backup)
+        if (org.firstinspires.ftc.teamcode.Constants.OCTOQUAD_IMU_BACKUP_ENABLED) {
+            try {
+                org.firstinspires.ftc.teamcode.hardware.OctoQuadFWv3.LocalizerDataBlock data =
+                    octoquad.readLocalizerData();
+
+                if (data != null && data.isPoseDataValid()) {
+                    // Apply heading scalar from Constants
+                    double heading = data.heading_rad *
+                        org.firstinspires.ftc.teamcode.Constants.OCTOQUAD_IMU_HEADING_SCALAR;
+
+                    // Normalize to [-π, π]
+                    while (heading > Math.PI) heading -= 2 * Math.PI;
+                    while (heading < -Math.PI) heading += 2 * Math.PI;
+
+                    RobotLog.i("IMU: Using OctoQuad IMU backup (heading=" + String.format("%.3f", heading) + " rad)");
+                    return heading;
+                }
+            } catch (Exception e) {
+                RobotLog.e("OctoQuad: Failed to read IMU: " + e.getMessage());
+            }
+        }
+
+        // Both IMUs failed
+        RobotLog.e("IMU: Both Pinpoint and OctoQuad IMU unavailable!");
+        return 0.0;
+    }
+
+    /**
+     * Gets the current IMU heading source.
+     *
+     * @return "PINPOINT", "OCTOQUAD_BACKUP", or "NONE"
+     */
+    public String getIMUSource() {
+        if (isPinpointHealthy()) {
+            return "PINPOINT";
+        } else if (org.firstinspires.ftc.teamcode.Constants.OCTOQUAD_IMU_BACKUP_ENABLED) {
+            try {
+                org.firstinspires.ftc.teamcode.hardware.OctoQuadFWv3.LocalizerDataBlock data =
+                    octoquad.readLocalizerData();
+                if (data != null && data.isPoseDataValid()) {
+                    return "OCTOQUAD_BACKUP";
+                }
+            } catch (Exception e) {
+                // Fall through
+            }
+        }
+        return "NONE";
+    }
 }
