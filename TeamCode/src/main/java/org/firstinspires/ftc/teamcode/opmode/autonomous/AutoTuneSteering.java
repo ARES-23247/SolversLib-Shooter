@@ -5,7 +5,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous; 
 
 import org.firstinspires.ftc.teamcode.Robot;
-import org.firstinspires.ftc.teamcode.command.subsystems.drive.Drive;
+import org.firstinspires.ftc.teamcode.subsystems.drive.Drive;
 import org.firstinspires.ftc.teamcode.util.tuning.SteeringTuner;
 
 import static org.firstinspires.ftc.teamcode.Constants.*;
@@ -57,8 +57,8 @@ import static org.firstinspires.ftc.teamcode.Constants.*;
  * <p>Adding kS + Ki helps the steering reach and hold precise angles more consistently,
  * especially when the robot is stationary or moving slowly.</p>
  *
- * @see org.firstinspires.ftc.teamcode.util.SteeringTuner
- * @see org.firstinspires.ftc.teamcode.util.FeedforwardTuner
+ * @see org.firstinspires.ftc.teamcode.util.tuning.SteeringTuner
+ * @see org.firstinspires.ftc.teamcode.util.tuning.FeedforwardTuner
  */
 @Autonomous(name = "Auto Tune Steering", group = "Tuning")
 

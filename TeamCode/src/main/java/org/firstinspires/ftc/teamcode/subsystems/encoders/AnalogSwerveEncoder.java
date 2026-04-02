@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.command.subsystems.encoders;
+package org.firstinspires.ftc.teamcode.subsystems.encoders;
 
 import org.firstinspires.ftc.teamcode.hardware.SRSHub;
 

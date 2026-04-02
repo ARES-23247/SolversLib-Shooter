@@ -18,20 +18,15 @@ The robot code is organized into several key packages:
 </p>
 
 <ul>
-  <li><b>{@link org.firstinspires.ftc.teamcode.commandbase}:</b> Command-based framework
-      with subsystems and commands for robot control</li>
-  <li><b>{@link org.firstinspires.ftc.teamcode.globals}:</b> Global configuration including
-      robot constants and hardware definitions</li>
+  <li><b>{@link org.firstinspires.ftc.teamcode.subsystems}:</b> Subsystems including
+      drive, encoders, and other robot components</li>
+  <li><b>{@link org.firstinspires.ftc.teamcode.commands}:</b> Commands for robot control</li>
   <li><b>{@link org.firstinspires.ftc.teamcode.util}:</b> Utility classes for motor control,
       sensor fusion, data logging, and calibration</li>
   <li><b>{@link org.firstinspires.ftc.teamcode.hardware}:</b> Hardware drivers for custom
       devices like the SRS Hub</li>
   <li><b>{@link org.firstinspires.ftc.teamcode.opmode}:</b> FTC OpModes for autonomous
       and teleop control</li>
-  <li><b>{@link org.firstinspires.ftc.teamcode.auto}:</b> Autonomous tuning and
-      calibration routines</li>
-  <li><b>{@link org.firstinspires.ftc.teamcode.calibration}:</b> Sensor and vision
-      calibration OpModes</li>
 </ul>
 
 <h2>Key Components</h2>
@@ -45,11 +40,11 @@ Key classes:
 </p>
 
 <ul>
-  <li>{@link org.firstinspires.ftc.teamcode.commandbase.subsystems.swerve.OctoSwerveDrivetrainV2}:
+  <li>{@link org.firstinspires.ftc.teamcode.subsystems.drive.OctoSwerveDrivetrainV2}:
       Main drivetrain controller</li>
-  <li>{@link org.firstinspires.ftc.teamcode.commandbase.subsystems.swerve.OctoSwerveModuleV2}:
+  <li>{@link org.firstinspires.ftc.teamcode.subsystems.drive.OctoSwerveModuleV2}:
       Individual swerve module with feedforward and PID control</li>
-  <li>{@link org.firstinspires.ftc.teamcode.commandbase.subsystems.swerve.encoders.SwerveEncoder}:
+  <li>{@link org.firstinspires.ftc.teamcode.subsystems.encoders.SwerveEncoder}:
       Swerve encoder interface with multiple implementations</li>
 </ul>
 
@@ -60,9 +55,9 @@ Advanced motor control techniques ensure smooth, efficient operation:
 </p>
 
 <ul>
-  <li>{@link org.firstinspires.ftc.teamcode.util.SlewRateLimiter}: Prevents sudden power
+  <li>{@link org.firstinspires.ftc.teamcode.util.control.SlewRateLimiter}: Prevents sudden power
       changes that cause current spikes</li>
-  <li>{@link org.firstinspires.ftc.teamcode.util.CurrentLimiter}: Monitors current draw
+  <li>{@link org.firstinspires.ftc.teamcode.util.control.CurrentLimiter}: Monitors current draw
       and scales motor power to prevent tripping the 20A fuse</li>
 </ul>
 
@@ -76,7 +71,7 @@ Multiple sensors are combined using an Extended Kalman Filter for accurate local
   <li><b>Swerve Odometry:</b> Position estimation from wheel encoders</li>
   <li><b>GoBilda Pinpoint:</b> Deadwheel odometry with IMU sensor fusion</li>
   <li><b>Limelight Vision:</b> AprilTag-based vision localization with multi-camera fusion</li>
-  <li>{@link org.firstinspires.ftc.teamcode.util.SensorFusionLocalizer}: Combines all
+  <li>{@link org.firstinspires.ftc.teamcode.util.localization.SensorFusionLocalizer}: Combines all
       sensors using EKF</li>
 </ul>
 
@@ -87,9 +82,9 @@ All robot-specific constants are centralized in:
 </p>
 
 <ul>
-  <li>{@link org.firstinspires.ftc.teamcode.globals.Constants}: Physical dimensions,
+  <li>{@link org.firstinspires.ftc.teamcode.Constants}: Physical dimensions,
       PIDF coefficients, feedforward constants, and tuning parameters</li>
-  <li>{@link org.firstinspires.ftc.teamcode.globals.Robot}: Robot singleton with hardware
+  <li>{@link org.firstinspires.ftc.teamcode.Robot}: Robot singleton with hardware
       initialization and subsystem access</li>
 </ul>
 
@@ -98,12 +93,10 @@ All robot-specific constants are centralized in:
 <h3>For New Developers</h3>
 
 <ol>
-  <li>Review the {@link org.firstinspires.ftc.teamcode.globals.Constants} class to understand
+  <li>Review the {@link org.firstinspires.ftc.teamcode.Constants} class to understand
       robot configuration</li>
-  <li>Study {@link org.firstinspires.ftc.teamcode.commandbase.subsystems.Drive} to see
+  <li>Study {@link org.firstinspires.ftc.teamcode.subsystems.drive.Drive} to see
       how the drive subsystem integrates everything</li>
-  <li>Examine {@link org.firstinspires.ftc.teamcode.commandbase.commands.TeleOpDrive} for
-      an example of a command implementation</li>
   <li>Check {@link org.firstinspires.ftc.teamcode.opmode.BaseTeleOp} for the standard
       TeleOp OpMode structure</li>
 </ol>
@@ -115,16 +108,14 @@ The codebase includes comprehensive tuning and calibration tools:
 </p>
 
 <ul>
-  <li>{@link org.firstinspires.ftc.teamcode.auto.AutoTuneFeedforward}: Automatically
+  <li>{@link org.firstinspires.ftc.teamcode.opmode.autonomous.AutoTuneFeedforward}: Automatically
       tune kS and kV feedforward constants</li>
-  <li>{@link org.firstinspires.ftc.teamcode.auto.AutoTuneSteering}: Automatically tune
+  <li>{@link org.firstinspires.ftc.teamcode.opmode.autonomous.AutoTuneSteering}: Automatically tune
       steering PID</li>
-  <li>{@link org.firstinspires.ftc.teamcode.util.SteeringTuner}: Manual steering PID
+  <li>{@link org.firstinspires.ftc.teamcode.util.tuning.SteeringTuner}: Manual steering PID
       tuning with real-time feedback</li>
-  <li>{@link org.firstinspires.ftc.teamcode.util.FeedforwardTuner}: Manual feedforward
+  <li>{@link org.firstinspires.ftc.teamcode.util.tuning.FeedforwardTuner}: Manual feedforward
       tuning with velocity testing</li>
-  <li>{@link org.firstinspires.ftc.teamcode.calibration.LimelightCalibrationOpMode}:
-      Calibrate camera mount position and orientation</li>
 </ul>
 
 <h2>Control Theory</h2>
@@ -173,9 +164,9 @@ Comprehensive telemetry and data logging are available:
 </p>
 
 <ul>
-  <li>{@link org.firstinspires.ftc.teamcode.util.DataLogger}: CSV logging to disk for
+  <li>{@link org.firstinspires.ftc.teamcode.util.logging.DataLogger}: CSV logging to disk for
       post-match analysis</li>
-  <li>FTC Dashboard integration for real-time visualization</li>
+  <li>Panels Dashboard integration for real-time visualization</li>
   <li>Per-module motor power breakdown (feedforward, PID, total)</li>
   <li>Battery voltage monitoring</li>
   <li>Loop timing and performance metrics</li>

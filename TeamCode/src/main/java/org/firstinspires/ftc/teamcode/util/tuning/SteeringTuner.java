@@ -1,7 +1,7 @@
 package org.firstinspires.ftc.teamcode.util.tuning;
 
-import org.firstinspires.ftc.teamcode.command.subsystems.drive.Drive;
-import org.firstinspires.ftc.teamcode.command.subsystems.drive.OctoSwerveModuleV2;
+import org.firstinspires.ftc.teamcode.subsystems.drive.Drive;
+import org.firstinspires.ftc.teamcode.subsystems.drive.OctoSwerveModuleV2;
 import org.firstinspires.ftc.teamcode.Robot;
 
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -65,8 +65,8 @@ import static org.firstinspires.ftc.teamcode.Constants.*;
  * <p>However, adding kS + Ki helps the steering reach and hold precise angles more consistently,
  * especially when the robot is stationary or moving slowly.</p>
  *
- * @see org.firstinspires.ftc.teamcode.commandbase.subsystems.Drive
- * @see org.firstinspires.ftc.teamcode.util.FeedforwardTuner
+ * @see org.firstinspires.ftc.teamcode.subsystems.drive.Drive
+ * @see org.firstinspires.ftc.teamcode.util.tuning.FeedforwardTuner
  */
 public class SteeringTuner {
 

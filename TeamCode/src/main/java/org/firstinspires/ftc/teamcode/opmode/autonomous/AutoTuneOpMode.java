@@ -5,7 +5,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 import org.firstinspires.ftc.teamcode.Robot;
-import org.firstinspires.ftc.teamcode.command.subsystems.drive.Drive;
+import org.firstinspires.ftc.teamcode.subsystems.drive.Drive;
 import org.firstinspires.ftc.teamcode.util.tuning.FeedforwardTuner;
 
 import static org.firstinspires.ftc.teamcode.Constants.*;
@@ -40,7 +40,7 @@ import static org.firstinspires.ftc.teamcode.Constants.*;
  *   <li>Display results to telemetry</li>
  * </ol>
  *
- * @see org.firstinspires.ftc.teamcode.util.FeedforwardTuner
+ * @see org.firstinspires.ftc.teamcode.util.tuning.FeedforwardTuner
  */
 @Autonomous(name = "Auto Tune Feedforward", group = "Tuning")
 

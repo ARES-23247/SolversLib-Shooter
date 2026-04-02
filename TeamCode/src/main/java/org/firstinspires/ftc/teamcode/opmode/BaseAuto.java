@@ -12,7 +12,7 @@ import com.seattlesolvers.solverslib.command.WaitCommand;
 import com.seattlesolvers.solverslib.pedroCommand.FollowPathCommand;
 import com.seattlesolvers.solverslib.util.TelemetryData;
 
-import org.firstinspires.ftc.teamcode.command.subsystems.drive.Drive;
+import org.firstinspires.ftc.teamcode.subsystems.drive.Drive;
 import org.firstinspires.ftc.teamcode.Robot;
 
 /**
@@ -48,7 +48,7 @@ import org.firstinspires.ftc.teamcode.Robot;
  * in this OpMode - it's handled in {@link Drive#periodic()}.</p>
  *
  * @see com.seattlesolvers.solverslib.command.CommandOpMode
- * @see org.firstinspires.ftc.teamcode.command.subsystems.drive.Drive
+ * @see org.firstinspires.ftc.teamcode.subsystems.drive.Drive
  * @see <a href="https://pedropathing.com/ Pedro Pathing Documentation</a>
  */
 @Autonomous(name = "Base Auto", group = "Autonomous")

@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.command.subsystems.encoders;
+package org.firstinspires.ftc.teamcode.subsystems.encoders;
 
 /**
  * Interface for swerve module encoders.

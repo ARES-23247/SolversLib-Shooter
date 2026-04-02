@@ -9,8 +9,8 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.RobotLog;
 import com.seattlesolvers.solverslib.command.CommandScheduler;
 import com.seattlesolvers.solverslib.photon.PhotonCore;
-import org.firstinspires.ftc.teamcode.command.subsystems.drive.Drive;
-import org.firstinspires.ftc.teamcode.command.subsystems.vision.Vision;
+import org.firstinspires.ftc.teamcode.subsystems.drive.Drive;
+import org.firstinspires.ftc.teamcode.subsystems.vision.Vision;
 import com.seattlesolvers.solverslib.hardware.motors.CRServoEx;
 import com.seattlesolvers.solverslib.hardware.motors.MotorEx;
 import com.seattlesolvers.solverslib.util.TelemetryData;
@@ -253,6 +253,12 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
     public Drive drive;
 
     /**
+     * Telemetry handler for the Drive subsystem.
+     * Separates all dashboard/CSV logging concerns from drive control logic.
+     */
+    private org.firstinspires.ftc.teamcode.subsystems.drive.DriveTelemetry driveTelemetry;
+
+    /**
      * Vision subsystem for AprilTag-based localization.
      * Integrates with Limelight to provide vision pose updates to the drive subsystem.
      */
@@ -261,7 +267,7 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
     // ----- Telemetry -----
 
     /**
-     * Global telemetry instance for sending data to the driver station and FTC Dashboard.
+     * Global telemetry instance for sending data to the driver station and Panels Dashboard.
      * Used throughout the codebase for debugging and monitoring robot state.
      */
     public TelemetryData telemetry;
@@ -458,12 +464,20 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
         drive = new Drive();
         vision = new Vision();
 
-        // Initialize Panels Dashboard
+        // Initialize Panels Dashboard for Capture & Replay
         try {
             org.firstinspires.ftc.teamcode.dashboard.PanelsDashboard.getInstance().initialize();
+            org.firstinspires.ftc.teamcode.dashboard.PanelsDashboard.getInstance().clearTrajectory();
             RobotLog.i("Panels Dashboard: Initialized successfully");
         } catch (Exception e) {
             RobotLog.w("Panels Dashboard: Initialization failed - " + e.getMessage());
+        }
+
+        // Instantiate Drive Telemetry (separated from drive control logic)
+        if (Constants.ENABLE_DASHBOARD_OVERLAY || Constants.ENABLE_CSV_LOGGING) {
+            driveTelemetry = new org.firstinspires.ftc.teamcode.subsystems.drive.DriveTelemetry(drive);
+        } else {
+            driveTelemetry = null;
         }
     }
 
@@ -491,6 +505,17 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
             cachedVoltage = 12;
         }
         return cachedVoltage;
+    }
+
+    /**
+     * Gets the current battery voltage.
+     *
+     * <p>Alias for {@link #getVoltage()} for consistency with drive telemetry.</p>
+     *
+     * @return the current battery voltage in volts (cached, updated every 250ms)
+     */
+    public double getBatteryVoltage() {
+        return getVoltage();
     }
 
     /**
@@ -639,6 +664,12 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
         // Run Scheduled Robot Commands and Subsystems periodically
         CommandScheduler.getInstance().run();
 
+        // Update Drive Telemetry (dashboard + CSV logging)
+        // Runs every loop for high-resolution capture & replay data
+        if (driveTelemetry != null && (Constants.ENABLE_DASHBOARD_OVERLAY || Constants.ENABLE_CSV_LOGGING)) {
+            driveTelemetry.update();
+        }
+
         // Throttled telemetry update (every N loops instead of every loop)
         if (this.telemetry != null && (loopCounter % TELEMETRY_UPDATE_INTERVAL == 0)) {
             this.telemetry.update();
@@ -655,6 +686,7 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
 
             // Update rolling average (exponential moving average with alpha=0.1)
             if (loopCounter == 0) {
+
                 averageLoopTimeMs = lastLoopTimeMs;
             } else {
                 averageLoopTimeMs = 0.1 * lastLoopTimeMs + 0.9 * averageLoopTimeMs;
@@ -710,32 +742,9 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
             return false;  // Pinpoint not initialized
         }
 
-        try {
-            // TODO: Fix Pinpoint health checks - API methods don't exist in GoBildaPinpointDriver
-            // Check if device is disconnected
-            // if (pinpoint.isDisconnected()) {
-            //     RobotLog.w("Pinpoint: Device disconnected, using OctoQuad IMU backup");
-            //     return false;
-            // }
-
-            // // Check if encoder data is stale (no updates for >100ms)
-            // if (pinpoint.getEncoderData().isStale()) {
-            //     RobotLog.w("Pinpoint: Encoder data stale, using OctoQuad IMU backup");
-            //     return false;
-            // }
-
-            // // Check if IMU is failed or calibrating
-            // if (!pinpoint.getIMUStatus().equals("READY")) {
-            //     RobotLog.w("Pinpoint: IMU status=" + pinpoint.getIMUStatus() + ", using OctoQuad IMU backup");
-            //     return false;
-            // }
-
-            return true;  // Pinpoint is healthy
-
-        } catch (Exception e) {
-            RobotLog.e("Pinpoint: Health check failed: " + e.getMessage() + ", using OctoQuad IMU backup");
-            return false;
-        }
+        // Pinpoint health is now managed by PinpointHealthMonitor utility class
+        // See Drive.java periodic() for health monitoring logic
+        return true;
     }
 
     /**

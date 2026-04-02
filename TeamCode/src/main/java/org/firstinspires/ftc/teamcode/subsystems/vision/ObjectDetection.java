@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.command.subsystems.vision;
+package org.firstinspires.ftc.teamcode.subsystems.vision;
 
 import com.seattlesolvers.solverslib.command.SubsystemBase;
 

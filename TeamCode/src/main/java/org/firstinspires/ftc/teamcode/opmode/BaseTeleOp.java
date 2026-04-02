@@ -5,7 +5,6 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import com.seattlesolvers.solverslib.command.CommandOpMode;
 import com.seattlesolvers.solverslib.util.TelemetryData;
 
-import org.firstinspires.ftc.teamcode.command.commands.TeleOpDrive;
 import org.firstinspires.ftc.teamcode.Robot;
 
 /**
@@ -18,7 +17,6 @@ import org.firstinspires.ftc.teamcode.Robot;
  * <p><b>Key Responsibilities:</b></p>
  * <ul>
  *   <li>Initialize robot hardware via {@link Robot#init(HardwareMap)}</li>
- *   <li>Bind the TeleOpDrive command as the default command for the drive subsystem</li>
  *   <li>Execute robot update loop via {@link Robot#updateLoop(TelemetryData)}</li>
  *   <li>Display loop timing telemetry for performance monitoring</li>
  * </ul>
@@ -27,12 +25,10 @@ import org.firstinspires.ftc.teamcode.Robot;
  * <ol>
  *   <li><b>Initialization:</b> Calls {@code robot.init(hardwareMap)} to initialize all hardware,
  *       subsystems, and PhotonCore bulk caching</li>
- *   <li><b>Default Command:</b> Binds {@link TeleOpDrive} to the drive subsystem, enabling
- *       continuous driver control via gamepad1 with field-centric driving and throttle control</li>
  *   <li><b>Update Loop:</b> Calls {@code robot.updateLoop(telemetryData)} which runs the command
  *       scheduler, updates subsystems, clears PhotonCore caches, and outputs telemetry</li>
- *   <li><b>Telemetry:</b> Outputs to both driver station and FTC Dashboard via MultipleTelemetry.
- *       During competition, FTC Dashboard is unavailable and all data shows on driver station.</li>
+ *   <li><b>Telemetry:</b> Outputs to both driver station and Panels Dashboard via MultipleTelemetry.
+ *       During competition, Panels Dashboard is unavailable and all data shows on driver station.</li>
  * </ol>
  *
  * <p><b>Delegation:</b> This OpMode delegates hardware management, command scheduling, and
@@ -40,7 +36,6 @@ import org.firstinspires.ftc.teamcode.Robot;
  * on those responsibilities.</p>
  *
  * @see com.seattlesolvers.solverslib.command.CommandOpMode
- * @see org.firstinspires.ftc.teamcode.command.commands.TeleOpDrive
  * @see org.firstinspires.ftc.teamcode.Robot
  */
 @TeleOp(name = "Base TeleOp", group = "TeleOp")
@@ -72,11 +67,7 @@ public class BaseTeleOp extends CommandOpMode {
      *   <li>Resets the command scheduler to clear any previous state</li>
      *   <li>Initializes robot hardware by calling {@link Robot#init(HardwareMap)}</li>
      *   <li>Sets up telemetry output with MultipleTelemetry for dual output</li>
-     *   <li>Binds the {@link TeleOpDrive} command as the default command for the drive subsystem</li>
      * </ol>
-     *
-     * <p><b>Default Command:</b> The TeleOpDrive command is bound to the drive subsystem,
-     * which enables continuous driver control via gamepad1 with field-centric driving enabled.</p>
      */
     @Override
     public void initialize() {
@@ -84,9 +75,6 @@ public class BaseTeleOp extends CommandOpMode {
 
         robot.init(hardwareMap);
         robot.telemetry = this.telemetryData;
-
-        // Bind default drive command to Gamepad 1 with Field Centric routing enabled
-        robot.drive.setDefaultCommand(new TeleOpDrive(gamepad1, true));
     }
 
     /**
@@ -119,7 +107,6 @@ public class BaseTeleOp extends CommandOpMode {
      * It performs the following operations:</p>
      * <ol>
      *   <li>Measures and reports loop execution time for performance monitoring</li>
-     *   <li>Outputs TeleOpDrive telemetry (throttle, button states, heading resets)</li>
      *   <li>Runs the robot's update loop which includes:
      *       <ul>
      *         <li>Command scheduler execution</li>
@@ -128,7 +115,6 @@ public class BaseTeleOp extends CommandOpMode {
      *         <li>Bulk cache clearing</li>
      *       </ul>
      *   </li>
-     *   <li>Profiles the update loop execution time</li>
      * </ol>
      *
      * <p><b>Loop Time Monitoring:</b> Displays the time (in milliseconds) taken for the
@@ -146,13 +132,6 @@ public class BaseTeleOp extends CommandOpMode {
 
         telemetryData.addData("Loop Time", timer.milliseconds());
         timer.reset();
-
-        // Output TeleOpDrive telemetry (throttle, buttons, heading resets)
-        if (robot.drive.getDefaultCommand() instanceof org.firstinspires.ftc.teamcode.command.commands.TeleOpDrive) {
-            org.firstinspires.ftc.teamcode.command.commands.TeleOpDrive driveCommand =
-                (org.firstinspires.ftc.teamcode.command.commands.TeleOpDrive) robot.drive.getDefaultCommand();
-            driveCommand.outputTelemetry(telemetryData);
-        }
 
         // Run the master loop which ticks subsystems, command scheduler, and clears bulk cache
         robot.updateLoop(telemetryData);

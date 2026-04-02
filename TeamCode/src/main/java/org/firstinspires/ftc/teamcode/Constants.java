@@ -1,6 +1,6 @@
 package org.firstinspires.ftc.teamcode;
 
-import org.firstinspires.ftc.teamcode.command.subsystems.encoders.SwerveEncoderFactory;
+import org.firstinspires.ftc.teamcode.subsystems.encoders.SwerveEncoderFactory;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 
 /**
@@ -48,7 +48,7 @@ import com.qualcomm.robotcore.hardware.PIDFCoefficients;
  * </ol>
  *
  * @see com.qualcomm.robotcore.hardware.PIDFCoefficients
- * @see org.firstinspires.ftc.teamcode.commandbase.subsystems.swerve.OctoSwerveModule
+ * @see org.firstinspires.ftc.teamcode.subsystems.drive.OctoSwerveModuleV2
  */
 public class Constants {
 
@@ -436,7 +436,7 @@ public class Constants {
      * <p>Minimum power to overcome gear resistance in the steering mechanism.</p>
      *
      * <p><b>Typical Values:</b> 0.02 - 0.05</p>
-     * <p><b>How to Tune:</b> Use {@link org.firstinspires.ftc.teamcode.util.SteeringTuner}</p>
+     * <p><b>How to Tune:</b> Use {@link org.firstinspires.ftc.teamcode.util.tuning.SteeringTuner}</p>
      *
      * <h3>About Steering Feedforward:</h3>
      * <p>Unlike drive motors, steering motors don't fight ground friction. They only need
@@ -459,7 +459,7 @@ public class Constants {
      * </ul>
      *
      * <p><b>Typical Values:</b> 6.0 - 15.0 rad/s (depending on servo/gear ratio)</p>
-     * <p><b>How to Measure:</b> Use {@link org.firstinspires.ftc.teamcode.util.SteeringTuner}</p>
+     * <p><b>How to Measure:</b> Use {@link org.firstinspires.ftc.teamcode.util.tuning.SteeringTuner}</p>
      *
      * <h3>Calculation:</h3>
      * <pre>MAX_STEERING_VELOCITY = (Servo Speed × Gear Ratio) / 60</pre>

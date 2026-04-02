@@ -1,11 +1,11 @@
-package org.firstinspires.ftc.teamcode.command.subsystems.drive;
+package org.firstinspires.ftc.teamcode.subsystems.drive;
 
 import com.seattlesolvers.solverslib.command.SubsystemBase;
 import com.seattlesolvers.solverslib.kinematics.wpilibkinematics.ChassisSpeeds;
 import org.firstinspires.ftc.teamcode.Robot;
 
 import org.firstinspires.ftc.teamcode.util.DataLogger;
-import org.firstinspires.ftc.teamcode.command.subsystems.drive.OctoSwerveDrivetrainV2;
+import org.firstinspires.ftc.teamcode.subsystems.drive.OctoSwerveDrivetrainV2;
 
 
 
@@ -40,7 +40,7 @@ import org.firstinspires.ftc.teamcode.command.subsystems.drive.OctoSwerveDrivetr
  *   <li><b>Step Response PID:</b> Analyzes step response for underdamped system</li>
  * </ol>
  *
- * @see org.firstinspires.ftc.teamcode.commandbase.Drive
+ * @see org.firstinspires.ftc.teamcode.subsystems.drive.Drive
  */
 public class SwerveTuner extends SubsystemBase {
 

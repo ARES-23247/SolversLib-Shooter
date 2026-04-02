@@ -1165,7 +1165,7 @@ class Circle extends OpMode {
 
     /**
      * This runs the OpMode, updating the Follower as well as printing out the debug statements to
-     * the Telemetry, as well as the FTC Dashboard.
+     * the Telemetry, as well as the Panels Dashboard.
      */
     @Override
     public void loop() {

@@ -1,10 +1,10 @@
-package org.firstinspires.ftc.teamcode.command.subsystems.vision;
+package org.firstinspires.ftc.teamcode.subsystems.vision;
 
 import com.seattlesolvers.solverslib.command.SubsystemBase;
 
 import org.firstinspires.ftc.teamcode.Robot;
 import org.firstinspires.ftc.teamcode.util.vision.LimelightCamera;
-import org.firstinspires.ftc.teamcode.command.subsystems.drive.Drive;
+import org.firstinspires.ftc.teamcode.subsystems.drive.Drive;
 import org.firstinspires.ftc.teamcode.Constants.VisionFusionMode;
 
 import com.pedropathing.geometry.Pose;
@@ -75,8 +75,8 @@ import static org.firstinspires.ftc.teamcode.Constants.*;
  * VISION_CAMERA_HEALTH_TIMEOUT = 5.0;
  * }</pre>
  *
- * @see org.firstinspires.ftc.teamcode.util.LimelightCamera
- * @see org.firstinspires.ftc.teamcode.util.SensorFusionLocalizer
+ * @see org.firstinspires.ftc.teamcode.util.vision.LimelightCamera
+ * @see org.firstinspires.ftc.teamcode.subsystems.localization.LocalizationSubsystem
  */
 public class Vision extends SubsystemBase {
 
@@ -96,6 +96,18 @@ public class Vision extends SubsystemBase {
     private List<LimelightCamera> activeCameras = new ArrayList<>();
 
     /**
+     * Cached fused vision pose from multi-camera fusion.
+     * Updated every periodic() call for LocalizationSubsystem to consume.
+     */
+    private Pose visionPose = null;
+
+    /**
+     * Cached vision pose uncertainty.
+     * Increased when cameras have floating detections.
+     */
+    private double visionUncertainty = 0.0;
+
+    /**
      * Loop counter for vision update throttling (update vision every N loops for performance).
      */
     private int visionLoopCounter = 0;
@@ -110,14 +122,18 @@ public class Vision extends SubsystemBase {
     /**
      * Periodic update method called every loop iteration.
      *
-     * <p>Performs multi-camera pose correction:</p>
+     * <p>Performs multi-camera pose estimation and fusion:</p>
      * <ol>
      *   <li>Update all cameras with latest detections</li>
      *   <li>Apply adaptive priority based on robot heading/movement</li>
-     *   <li>Select fusion mode and compute pose correction</li>
-     *   <li>Apply sensor fusion correction</li>
+     *   <li>Select fusion mode and compute fused pose</li>
+     *   <li>Cache vision pose for LocalizationSubsystem to consume</li>
      *   <li>Update telemetry with all camera statuses</li>
      * </ol>
+     *
+     * <p>Note: Vision subsystem does NOT apply sensor fusion corrections directly.
+     * LocalizationSubsystem consumes the vision pose via {@link #getRobotPose()} and
+     * applies EKF corrections.</p>
      */
     @Override
     public void periodic() {
@@ -180,8 +196,11 @@ public class Vision extends SubsystemBase {
         // Step 3: Select fusion mode and compute pose correction
         double[] fusedPose = selectPoseByFusionMode();
 
-        // Step 4: Apply sensor fusion correction with adaptive noise
-        if (fusedPose != null && robot.drive != null && robot.drive.getSensorFusion() != null) {
+        // Step 4: Cache vision pose for LocalizationSubsystem
+        if (fusedPose != null) {
+            // Create Pose object from fused pose data
+            visionPose = new Pose(fusedPose[0], fusedPose[1], fusedPose[2]);
+
             // Check if any active camera has floating robot detection
             boolean hasFloatingReading = checkAnyCameraFloating();
 
@@ -189,22 +208,16 @@ public class Vision extends SubsystemBase {
                 // Use increased noise for floating readings
                 double positionNoise = calculateEffectivePositionNoise();
                 double headingNoise = calculateEffectiveHeadingNoise();
-
-                robot.drive.getSensorFusion().correctWithVision(
-                    fusedPose[0],
-                    fusedPose[1],
-                    fusedPose[2],
-                    positionNoise,
-                    headingNoise
-                );
+                // Store the position noise as the uncertainty (use max of position/heading)
+                visionUncertainty = Math.max(positionNoise, headingNoise);
             } else {
                 // Normal vision correction with default noise
-                robot.drive.getSensorFusion().correctWithVision(
-                    fusedPose[0],
-                    fusedPose[1],
-                    fusedPose[2]
-                );
+                visionUncertainty = org.firstinspires.ftc.teamcode.Constants.FUSION_VISION_NOISE_POSITION;
             }
+        } else {
+            // No valid vision detection
+            visionPose = null;
+            visionUncertainty = 0.0;
         }
 
         // Step 5: Telemetry
@@ -217,8 +230,11 @@ public class Vision extends SubsystemBase {
      * <p>Boosts priority for cameras facing the direction of movement.</p>
      */
     private void applyAdaptivePriority() {
-        // Get robot velocities
-        Pose currentPose = robot.drive.getSensorFusion().getEstimatedPose();
+        // Get robot heading from LocalizationSubsystem
+        Pose currentPose = robot.drive.getLocalization().getFusedPose();
+        if (currentPose == null) {
+            return;  // No pose available yet
+        }
         double heading = currentPose.getHeading();
 
         double forwardSpeed = robot.drive.getTeleOpSpeeds().vxMetersPerSecond;
@@ -580,5 +596,28 @@ public class Vision extends SubsystemBase {
         }
         // No floating readings, use default
         return org.firstinspires.ftc.teamcode.Constants.FUSION_VISION_NOISE_HEADING;
+    }
+
+    /**
+     * Gets the fused vision pose from multi-camera fusion.
+     *
+     * <p>This pose is computed by the Vision subsystem and consumed by
+     * LocalizationSubsystem for sensor fusion correction.</p>
+     *
+     * @return fused vision pose, or null if no valid detections
+     */
+    public Pose getRobotPose() {
+        return visionPose;
+    }
+
+    /**
+     * Gets the vision pose uncertainty.
+     *
+     * <p>This uncertainty is increased when cameras have floating detections.</p>
+     *
+     * @return position uncertainty (inches), or 0 if no valid detection
+     */
+    public double getPoseUncertainty() {
+        return visionUncertainty;
     }
 }

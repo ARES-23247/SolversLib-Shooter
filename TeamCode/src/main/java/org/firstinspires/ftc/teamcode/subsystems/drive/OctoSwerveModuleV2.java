@@ -1,7 +1,7 @@
-package org.firstinspires.ftc.teamcode.command.subsystems.drive;
+package org.firstinspires.ftc.teamcode.subsystems.drive;
 
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
-import org.firstinspires.ftc.teamcode.command.subsystems.encoders.SwerveEncoder;
+import org.firstinspires.ftc.teamcode.subsystems.encoders.SwerveEncoder;
 import com.seattlesolvers.solverslib.hardware.motors.CRServoEx;
 import com.seattlesolvers.solverslib.hardware.motors.MotorEx;
 import com.seattlesolvers.solverslib.geometry.Vector2d;
@@ -30,8 +30,8 @@ import static org.firstinspires.ftc.teamcode.Constants.*;
  * encoder type based on configuration.</p>
  *
  * @see SwerveEncoder
- * @see org.firstinspires.ftc.teamcode.commandbase.subsystems.swerve.encoders.OctoQuadSwerveEncoder
- * @see org.firstinspires.ftc.teamcode.commandbase.subsystems.swerve.encoders.AnalogSwerveEncoder
+ * @see org.firstinspires.ftc.teamcode.subsystems.encoders.OctoQuadSwerveEncoder
+ * @see org.firstinspires.ftc.teamcode.subsystems.encoders.AnalogSwerveEncoder
  */
 public class OctoSwerveModuleV2 {
 

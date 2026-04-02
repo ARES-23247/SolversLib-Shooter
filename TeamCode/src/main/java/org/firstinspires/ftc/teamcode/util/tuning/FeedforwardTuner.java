@@ -1,6 +1,6 @@
 package org.firstinspires.ftc.teamcode.util.tuning;
 
-import org.firstinspires.ftc.teamcode.command.subsystems.drive.Drive;
+import org.firstinspires.ftc.teamcode.subsystems.drive.Drive;
 import org.firstinspires.ftc.teamcode.Robot;
 
 import com.seattlesolvers.solverslib.kinematics.wpilibkinematics.ChassisSpeeds;
@@ -46,7 +46,7 @@ import static org.firstinspires.ftc.teamcode.Constants.*;
  *   <li><b>Report:</b> Display results to driver station telemetry</li>
  * </ol>
  *
- * @see org.firstinspires.ftc.teamcode.commandbase.subsystems.Drive
+ * @see org.firstinspires.ftc.teamcode.subsystems.Drive
  */
 public class FeedforwardTuner {
 
@@ -434,8 +434,8 @@ public class FeedforwardTuner {
      * Initializes position tracking for safety distance monitoring.
      */
     private void initializePositionTracking() {
-        // Get current pose from sensor fusion
-        Pose currentPose = drive.getSensorFusion().getEstimatedPose();
+        // Get current pose from localization
+        Pose currentPose = drive.getLocalization().getFusedPose();
         if (currentPose != null) {
             startingX = currentPose.getX();
             startingY = currentPose.getY();
@@ -460,7 +460,7 @@ public class FeedforwardTuner {
      * @return true if distance limit exceeded
      */
     private boolean checkDistanceLimit() {
-        Pose currentPose = drive.getSensorFusion().getEstimatedPose();
+        Pose currentPose = drive.getLocalization().getFusedPose();
         if (currentPose == null) {
             return false;  // Can't check without pose data
         }

@@ -1,9 +1,9 @@
-package org.firstinspires.ftc.teamcode.command.subsystems.drive;
+package org.firstinspires.ftc.teamcode.subsystems.drive;
 
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import org.firstinspires.ftc.teamcode.hardware.OctoQuadFWv3;
-import org.firstinspires.ftc.teamcode.command.subsystems.encoders.SwerveEncoder;
-import org.firstinspires.ftc.teamcode.command.subsystems.encoders.SwerveEncoderFactory;
+import org.firstinspires.ftc.teamcode.subsystems.encoders.SwerveEncoder;
+import org.firstinspires.ftc.teamcode.subsystems.encoders.SwerveEncoderFactory;
 import com.seattlesolvers.solverslib.hardware.motors.CRServoEx;
 import com.seattlesolvers.solverslib.hardware.motors.MotorEx;
 import com.seattlesolvers.solverslib.kinematics.wpilibkinematics.ChassisSpeeds;
@@ -263,7 +263,7 @@ public class OctoSwerveDrivetrainV2 {
      *
      * @return array of 4 swerve modules [FR, FL, BL, BR]
      */
-    public org.firstinspires.ftc.teamcode.command.subsystems.drive.OctoSwerveModuleV2[] getModules() {
+    public org.firstinspires.ftc.teamcode.subsystems.drive.OctoSwerveModuleV2[] getModules() {
         return modules;
     }
 }
